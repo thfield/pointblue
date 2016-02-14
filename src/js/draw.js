@@ -2,21 +2,10 @@
   'use strict';
 
   let Dataset = {
-    dataByDemographic: function(){
-      let genderKey = {'male': ["B01001_003E","B01001_004E","B01001_005E","B01001_006E","B01001_007E","B01001_008E","B01001_009E","B01001_010E","B01001_011E","B01001_012E","B01001_013E","B01001_014E","B01001_015E","B01001_016E","B01001_017E","B01001_018E","B01001_019E","B01001_020E","B01001_021E","B01001_022E","B01001_023E","B01001_024E","B01001_025E","B01001_002E"],'female': ["B01001_027E","B01001_028E","B01001_029E","B01001_030E","B01001_031E","B01001_032E","B01001_033E","B01001_034E","B01001_035E","B01001_036E","B01001_037E","B01001_038E","B01001_039E","B01001_040E","B01001_041E","B01001_042E","B01001_043E","B01001_044E","B01001_045E","B01001_046E","B01001_047E","B01001_048E","B01001_049E","B01001_026E"],'both': ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x"]}
-      let arr = [];
-      let tempObj = _.pick(this.rawData[this.censusTract], genderKey[this.gender()]);
-      for (let prop in tempObj) {
-        arr.push({ name: prop, value: +tempObj[prop] })
-      };
-      return this.nameDemographic(arr);
-    },
     dataByTract: function(){
       let result = _.mapValues(this.rawData, (prop) => {
         return +prop[this.demographic]
       });
-      // TODO: don't always delete citywide data
-      delete result.citywide;
       return result;
     },
     nameDemographic: function(arr){
@@ -41,31 +30,24 @@
     .append("svg")
     .chart("Choropleth")
     .range('q10s')
-    .projection(d3.geo.mercator().center([-122.433701, 37.767683]))
-    .scale(150000)
+    .projection(d3.geo.mercator().center([-122.3129835144942, 37.95379741727219]))
+    .scale(10000)
     .height(500)
-    .width(480);
-
-  let barchart = d3.select("#barchart_container")
-    .append('svg')
-    .chart('BarChart', {})
-    .yFormat(d3.format("d"))
-    .height(400)
-    .width(800);
+    .width(480)
+    .boundary('watershed');
 
 
-  /* initial draw of barchart*/
   queue()
-    .defer(d3.json, 'data/age-sex.json')
-    .defer(d3.json, 'data/tracts_topo.json')
+    .defer(d3.json, 'data/annual/2009.json')
+    .defer(d3.json, 'data/watersheds-topo2.json')
     .await(drawFirst)
 
   function drawFirst(error, data, geo) {
     Dataset.rawData = data;
-    let topoFeat = topojson.feature(geo, geo.objects.sf).features;
+    let topoFeat = topojson.feature(geo, geo.objects['watersheds.geo']).features;
     let dataBind = Dataset.dataByTract();
     mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
-    barchart.draw(Dataset.dataByDemographic());
+
   };
 
 

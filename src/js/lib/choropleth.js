@@ -18,6 +18,7 @@
           chart._path = d3.geo.path();
           chart._projection = chart._projection || d3.geo.mercator();
           chart._scale = chart._scale || 1000;
+          chart._boundary = chart._boundary || 'boundary';
 
           chart.quantize = d3.scale.quantize()
             .domain(chart._domain)
@@ -56,9 +57,9 @@
               var scale = chart._scale;
 
               return this.append("path")
-                  .attr('class', function(d){ return chart._gender + ' ' + chart.quantize(chart.data[d.id]) })
+                  .attr('class', function(d){ return chart.quantize(chart.data[d.id]) })
                   // .style("fill", function (d) { return chart.quantize(chart.data[d.id]); })
-                  .classed('censustract', true)
+                  .classed(chart._boundary, true)
                   .attr("d", chart._path.projection(chart._projection
                                                          .scale(chart._scale)
                                                          .translate([chart.w / 2, chart.h / 2])));
@@ -97,6 +98,14 @@
           return this._gender;
         }
         this._gender = newGender;
+        return this;
+      },
+
+      boundary: function(newBoundary) {
+        if (arguments.length === 0) {
+          return this._boundary;
+        }
+        this._boundary = newBoundary;
         return this;
       },
 

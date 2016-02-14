@@ -56,17 +56,8 @@ path{
 .highway{ stroke: #111; stroke-width: 1.5px; }
 
 
-/* neighborhood map */
-.neighborhood{
-  fill: rgba(177, 168, 153, 0.5);
-  stroke: #38383a;
-}
-.neighborhood:hover{
-   fill: rgba(247, 91, 68, 0.5);
-}
-
 /* colors */
-.male{
+.watershed{
   &.q0-9{ fill:rgba(247,251,255,0.6); }
   &.q1-9{ fill:rgba(222,235,247,0.6); }
   &.q2-9{ fill:rgba(198,219,239,0.6); }
@@ -113,6 +104,6 @@ path{
   }
 }
 /* census map */
-.censustract:hover{
+.watershed:hover{
   fill: rgba(247, 91, 68, 0.5);
 }

@@ -37,9 +37,6 @@
       .attr('height', height)
       .attr('id','map')
 
-  var barsvg = d3.select('#barchart_container').append('svg')
-      .attr('height', barchartHeight)
-      .attr('id','barchart')
 
   var colorMap = d3.map(),
       keymap = []
@@ -51,20 +48,18 @@
       .size([width, height])
 
   var projection = d3.geo.mercator()
-      .center([-122.433701, 37.767683])
+      .center([-122.3129835144942, 37.95379741727219])
       .scale(width*scaleMultiplier)
       .translate([width / 2, height / 2])
 
   var path = d3.geo.path()
       .projection(projection)
 
-  var currentTract = 'citywide'
-
   ttInit('body')
 
-  mapsvg
-      .call(renderTiles, 'highroad') //remove to stop roads rendering
-      .call(renderNeighborhoods) //remove to stop neighborhoods rendering
+  // mapsvg
+      // .call(renderTiles, 'highroad') //remove to stop roads rendering
+      // .call(renderNeighborhoods) //remove to stop neighborhoods rendering
 
   mapsvg.call(renderCensusTract) //remove to stop neighborhoods rendering
 
@@ -78,6 +73,8 @@
     changeDemographic('B01001_002E')
     renderBarChart(barsvg)
   })
+
+
 
   /* page listeners */
   d3.select('#dropdown').on('change', function(){
@@ -145,87 +142,6 @@
     return result
   }
 
-  function renderBarChart(svg){
-    svg.append('g').attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    var data = getDemographicCategories(0, currentTract)
-
-    x.domain(categoryTitles);
-    y.domain([0, d3.max(data, function(d) { return d.val; } )]);
-    quantize.domain( y.domain() )
-
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform",  function(d) {
-          return 'translate(0,' + barchartHeight + ')'
-        })
-        .attr('text-anchor', 'start')
-        .call(xAxis)
-      .selectAll("text")
-        .attr("y", 0)
-        .attr("x", 9)
-        .attr("dy", ".35em")
-        .attr("transform", "rotate(-90)")
-        .style("text-anchor", "start");
-
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-      .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("Population");
-
-    svg.selectAll(".bar")
-        .data(data)
-      .enter().append("rect")
-        // .attr("class", "bar")
-        .attr('class', function(d){
-          return 'bar ' + quantize(d.val) + getCurrentGender()
-        })
-        .attr("x", function(d) { return x(d.category); })
-        .attr("width", x.rangeBand())
-        .attr("y", function(d) { return y(d.val); })
-        .attr("height", function(d) { return barchartHeight - y(d.val); })
-        .on('click', function(d){
-          return dispatcher.changeDemo(d.acs)
-        })
-        .on("mouseover", function(d){
-          var me = d3.select(this),
-              thisText = d.val;
-          return ttFollow(me, thisText)
-        } )
-        .on("mouseout", ttHide );
-
-    svg.append('text')
-      .attr("y", 16)
-      .attr("x", 25)
-      .attr("class", "tracttitle")
-      .text('Census Tract '+ currentTract )
-  }
-
-  function changeBarChart(tract){
-    var gender = getCurrentGender()
-    var scopedata = getDemographicCategories(gender,tract)
-    // var foo = [];
-    // data.forEach(function(el){
-    //   foo.push(el.acs)
-    // })
-    x.domain(categoryTitles);
-    y.domain([0, d3.max(scopedata, function(d) { return d.val; } )]);
-    // debugger;
-    quantize.domain(y.domain())
-    var bars = d3.selectAll('.bar')
-    bars.data(scopedata)
-        .attr('class', function(d){
-          return 'bar ' + quantize(d.val) + gender
-        })
-        .attr("y", function(d) { return y(d.val)} )
-        .attr("height", function(d) { return barchartHeight - y(d.val); });
-    d3.select('.tracttitle')
-      .text('Census Tract ' + tract)
-  }
 
   function renderTiles(svg, type) {
     svg.append('g')
@@ -249,24 +165,7 @@
         })
   }
 
-  function renderNeighborhoods(svg){
-    d3.json('data/sf-neighborhoods.json', function(error, sf) {
-      if (error) return console.error(error)
 
-      svg.append('g')
-          .attr('class', 'neighborhoods hidden')
-        .selectAll('.neighborhood')
-          .data(topojson.feature(sf, sf.objects.SFFind_Neighborhoods).features)
-        .enter().append('a')
-          .attr('xlink:href',function(d) { return '#' || d.properties.LINK }) //change property here to change link
-        .append('path')
-          .attr('class', 'neighborhood')
-          .on('mouseover', function(d) { return setTitle(d.properties.name) })
-          .attr('d', path)
-          .append('svg:title')
-          .text( function(d) { return d.properties.name })
-    })
-  }
 
   function renderCensusTract(svg){
     d3.json('data/tracts_topo.json', function(error, tract) {
@@ -352,9 +251,9 @@
 }
 })()
 
-function layerHideShow(cb) {
-  d3.select('.' + cb.name).classed('hidden', !cb.checked)
-}
+// function layerHideShow(cb) {
+//   d3.select('.' + cb.name).classed('hidden', !cb.checked)
+// }
 
 function ttInit(element){
   d3.select(element).append('div')
