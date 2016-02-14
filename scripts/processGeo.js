@@ -10,10 +10,15 @@ let outputFile = "geoInfo.json",
 outputData.centerPt = turf.centroid(inputData);
 outputData.envelope = turf.envelope(inputData);
 
+
+// let features = [
+//   outputData.centerPt,
+//   outputData.envelope
+// ]
+// outputData = turf.featurecollection(outputData.envelope)
+
+
 writeToFile(outputData, outputFile);
-
-
-
 
 function writeToFile(obj, filename){
   fs.writeFile(filename, JSON.stringify(obj), function(err) {

@@ -24,27 +24,51 @@ let testKey = [{ id: '1113810002', name: 'Robinson Creek' },
                { id: '1113820001', name: 'Middle Rockpile Creek' }];
 
 
-// key = key.slice(0,5); //remove for all basins!
+key = key.slice(0,5); //remove for all basins!
 
-key.forEach(function(basin){
-  let filename = 'raw/json/SFB-PWS-' + basin.id + '-' + predictionModel + '.json';
-    try {
-      fs.accessSync(filename, fs.F_OK); //make sure the file is there
-      let basinData = JSON.parse(fs.readFileSync(filename, 'utf8'))
-      basinData = formatBasin(basinData);
-      convertToYearDict(basinData, basin.id);
-    } catch (e) {
-      // console.log('file not found')
-        // It isn't accessible
-    }
-})
+getData(predictionModel, key);
 
-for (let year in output){
-  let file = 'annual/'+year+'.json'
-  writeToFile(output[year],file);
+function getData(predictionModel, basinKey){
+  let recordPromises = basinKey.map(fetchBasinRecord)
+  Promise.all(recordPromises)
+    .then(function(results){
+      for (let year in output){
+        let file = 'annual/'+year+'.json'
+        let oldYear = [];
+        try {
+            fs.accessSync(filename, fs.F_OK); //make sure the file is there
+            oldYear = JSON.parse(fs.readFileSync(file, 'utf8'))
+        } catch (e) {}
+        oldYear = oldYear.concat(output[year])
+        writeToFile(oldYear,file);
+      }
+    })
 }
 
+function convert(basinRecord) {
+  basinRecord.data.forEach(function(annum){
+    output[annum.year] = output[annum.year] || [];
+    output[annum.year].push({id:basinRecord.id, temp: annum.temp, precip: annum.precip})
+  })
+}
 
+function fetchBasinRecord(area){
+  let filename = 'raw/SFB-PWS-' + area.id + '-' + predictionModel + '.csv';
+  try {
+      fs.accessSync(filename, fs.F_OK); //make sure the file is there
+      return new Promise((resolve, reject)=>{
+        converter.fromFile(filename,function(err,result){ //read the csv files
+          let temp = {id: area.id, data:formatBasin(result)};
+          convert(temp);
+          resolve(temp);
+        })
+      })
+
+  } catch (e) {
+    // console.log('file not found')
+      // It isn't accessible
+  }
+}
 
 function formatBasin(data){
   let obj = {};
@@ -65,13 +89,6 @@ function formatBasin(data){
   return arr;
 }
 
-function convertToYearDict(basinRecord, basinId) {
-  basinRecord.forEach(function(annum){
-    output[annum.year] = output[annum.year] || [];
-    output[annum.year].push({id:basinId, temp: annum.temp, precip: annum.precip})
-  })
-}
-
 
 function writeToFile(obj, filename){
   fs.writeFile(filename, JSON.stringify(obj), function(err) {
@@ -81,4 +98,8 @@ function writeToFile(obj, filename){
       console.log('File saved as ' + filename)
     }
   })
+}
+
+function foo(bar){
+  console.log(bar);
 }
