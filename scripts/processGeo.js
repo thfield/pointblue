@@ -24,3 +24,9 @@ function writeToFile(obj, filename){
     }
   })
 }
+
+
+/*
+command line to convert to topo
+topojson -o watersheds-topo2.json --id-property zone --properties name=mm_label --simplify-proportion .2 watersheds.geo.json
+*/
