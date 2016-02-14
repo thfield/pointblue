@@ -1,0 +1,145 @@
+/* general */
+body {
+  /* background: #000000; */ }
+
+svg {
+  width: 100%;
+  height: 100%; }
+
+path {
+  fill: none;
+  stroke: #000; }
+
+/* tooltip */
+#tooltip {
+  position: absolute;
+  /*width: 200px;*/
+  height: auto;
+  padding: 10px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none; }
+  #tooltip span {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    line-height: 20px; }
+  #tooltip .hidden {
+    display: none; }
+
+/* structure */
+.chart-container {
+  /*width: 650px;*/
+  /*height: 650px;*/
+  /*background-color: #e8e8e8;*/
+  display: inline-block; }
+
+.about {
+  font-size: .7em; }
+
+#map_container {
+  height: 500px; }
+
+/* osm road map */
+.major_road {
+  stroke: #444; }
+
+.minor_road {
+  stroke: #bbb; }
+
+.highway {
+  stroke: #111;
+  stroke-width: 1.5px; }
+
+/* colors */
+.watershed.q0-9 {
+  fill: rgba(247, 251, 255, 0.6); }
+
+.watershed.q1-9 {
+  fill: rgba(222, 235, 247, 0.6); }
+
+.watershed.q2-9 {
+  fill: rgba(198, 219, 239, 0.6); }
+
+.watershed.q3-9 {
+  fill: rgba(158, 202, 225, 0.6); }
+
+.watershed.q4-9 {
+  fill: rgba(107, 174, 214, 0.6); }
+
+.watershed.q5-9 {
+  fill: rgba(66, 146, 198, 0.6); }
+
+.watershed.q6-9 {
+  fill: rgba(33, 113, 181, 0.6); }
+
+.watershed.q7-9 {
+  fill: rgba(8, 81, 156, 0.6); }
+
+.watershed.q8-9 {
+  fill: rgba(8, 48, 107, 0.6); }
+
+.precip.q0-9 {
+  fill: #d73027; }
+
+.precip.q1-9 {
+  fill: #f46d43; }
+
+.precip.q2-9 {
+  fill: #fdae61; }
+
+.precip.q3-9 {
+  fill: #fee090; }
+
+.precip.q4-9 {
+  fill: #ffffbf; }
+
+.precip.q5-9 {
+  fill: #e0f3f8; }
+
+.precip.q6-9 {
+  fill: #abd9e9; }
+
+.precip.q7-9 {
+  fill: #74add1; }
+
+.precip.q8-9 {
+  fill: #4575b4; }
+
+.temp.q0-9 {
+  fill: #4575b4; }
+
+.temp.q1-9 {
+  fill: #74add1; }
+
+.temp.q2-9 {
+  fill: #abd9e9; }
+
+.temp.q3-9 {
+  fill: #e0f3f8; }
+
+.temp.q4-9 {
+  fill: #ffffbf; }
+
+.temp.q5-9 {
+  fill: #fee090; }
+
+.temp.q6-9 {
+  fill: #fdae61; }
+
+.temp.q7-9 {
+  fill: #f46d43; }
+
+.temp.q8-9 {
+  fill: #d73027; }
+
+/* bar chart */
+.bar {
+  stroke: #000; }
+  .bar:hover {
+    fill: rgba(247, 91, 68, 0.5); }
+
+/* census map */
+.watershed:hover {
+  fill: rgba(247, 91, 68, 0.5); }
