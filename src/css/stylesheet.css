@@ -25,8 +25,12 @@ path {
     font-family: sans-serif;
     font-size: 12px;
     line-height: 20px; }
-  #tooltip .hidden {
+  #tooltip.hidden {
     display: none; }
+
+/* legend */
+.label {
+  font-size: 10px; }
 
 /* structure */
 .chart-container {
@@ -37,9 +41,6 @@ path {
 
 .about {
   font-size: .7em; }
-
-#map_container {
-  height: 500px; }
 
 /* osm road map */
 .major_road {
@@ -53,93 +54,34 @@ path {
   stroke-width: 1.5px; }
 
 /* colors */
-.watershed.q0-9 {
-  fill: rgba(247, 251, 255, 0.6); }
+.q0-9 {
+  fill: #d73027; }
 
-.watershed.q1-9 {
-  fill: rgba(222, 235, 247, 0.6); }
+.q1-9 {
+  fill: #f46d43; }
 
-.watershed.q2-9 {
-  fill: rgba(198, 219, 239, 0.6); }
+.q2-9 {
+  fill: #fdae61; }
 
-.watershed.q3-9 {
-  fill: rgba(158, 202, 225, 0.6); }
+.q3-9 {
+  fill: #fee090; }
 
-.watershed.q4-9 {
-  fill: rgba(107, 174, 214, 0.6); }
+.q4-9 {
+  fill: #ffffbf; }
 
-.watershed.q5-9 {
-  fill: rgba(66, 146, 198, 0.6); }
+.q5-9 {
+  fill: #e0f3f8; }
 
-.watershed.q6-9 {
-  fill: rgba(33, 113, 181, 0.6); }
+.q6-9 {
+  fill: #abd9e9; }
 
-.watershed.q7-9 {
-  fill: rgba(8, 81, 156, 0.6); }
+.q7-9 {
+  fill: #74add1; }
 
-.watershed.q8-9 {
-  fill: rgba(8, 48, 107, 0.6); }
-
-.female.q0-9 {
-  fill: rgba(247, 244, 249, 0.6); }
-
-.female.q1-9 {
-  fill: rgba(231, 225, 239, 0.6); }
-
-.female.q2-9 {
-  fill: rgba(212, 185, 218, 0.6); }
-
-.female.q3-9 {
-  fill: rgba(201, 148, 199, 0.6); }
-
-.female.q4-9 {
-  fill: rgba(223, 101, 176, 0.6); }
-
-.female.q5-9 {
-  fill: rgba(231, 41, 138, 0.6); }
-
-.female.q6-9 {
-  fill: rgba(206, 18, 86, 0.6); }
-
-.female.q7-9 {
-  fill: rgba(152, 0, 67, 0.6); }
-
-.female.q8-9 {
-  fill: rgba(103, 0, 31, 0.6); }
-
-.both.q0-9 {
-  fill: rgba(247, 252, 245, 0.6); }
-
-.both.q1-9 {
-  fill: rgba(229, 245, 224, 0.6); }
-
-.both.q2-9 {
-  fill: rgba(199, 233, 192, 0.6); }
-
-.both.q3-9 {
-  fill: rgba(161, 217, 155, 0.6); }
-
-.both.q4-9 {
-  fill: rgba(116, 196, 118, 0.6); }
-
-.both.q5-9 {
-  fill: rgba(65, 171, 93, 0.6); }
-
-.both.q6-9 {
-  fill: rgba(35, 139, 69, 0.6); }
-
-.both.q7-9 {
-  fill: rgba(0, 109, 44, 0.6); }
-
-.both.q8-9 {
-  fill: rgba(0, 68, 27, 0.6); }
+.q8-9 {
+  fill: #4575b4; }
 
 /* bar chart */
-.bar {
-  stroke: #000; }
-  .bar:hover {
-    fill: rgba(247, 91, 68, 0.5); }
-
 /* census map */
 .watershed:hover {
-  fill: rgba(247, 91, 68, 0.5); }
+  fill: #00bf02; }

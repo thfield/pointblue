@@ -47,7 +47,6 @@
     let topoFeat = topojson.feature(geo, geo.objects['watersheds.geo']).features;
     let dataBind = Dataset.dataByTract();
     mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
-
   };
 
 
