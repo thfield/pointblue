@@ -134,6 +134,63 @@ path {
 .both.q8-9 {
   fill: rgba(0, 68, 27, 0.6); }
 
+.precip.q0-9 {
+  fill: #d73027; }
+
+.precip.q1-9 {
+  fill: #f46d43; }
+
+.precip.q2-9 {
+  fill: #fdae61; }
+
+.precip.q3-9 {
+  fill: #fee090; }
+
+.precip.q4-9 {
+  fill: #ffffbf; }
+
+.precip.q5-9 {
+  fill: #e0f3f8; }
+
+.precip.q6-9 {
+  fill: #abd9e9; }
+
+.precip.q7-9 {
+  fill: #74add1; }
+
+.precip.q8-9 {
+  fill: #4575b4; }
+
+.temp.q0-9 {
+  fill: #4575b4; }
+
+.temp.q1-9 {
+  fill: #74add1; }
+
+.temp.q2-9 {
+  fill: #abd9e9; }
+
+.temp.q3-9 {
+  fill: #e0f3f8; }
+
+.temp.q4-9 {
+  fill: #ffffbf; }
+
+.temp.q5-9 {
+  fill: #fee090; }
+
+.temp.q6-9 {
+  fill: #fdae61; }
+
+.temp.q7-9 {
+  fill: #f46d43; }
+
+.temp.q8-9 {
+  fill: #d73027; }
+
+.temp:hover {
+  fill: rgba(0, 109, 44, 0.6); }
+
 /* bar chart */
 .bar {
   stroke: #000; }

@@ -93,6 +93,29 @@ path{
   &.q8-9{ fill:rgba(0,68,27,0.6) }
 }
 
+.precip{
+  &.q0-9 {fill: #d73027;}
+  &.q1-9 {fill: #f46d43;}
+  &.q2-9 {fill: #fdae61;}
+  &.q3-9 {fill: #fee090;}
+  &.q4-9 {fill: #ffffbf;}
+  &.q5-9 {fill: #e0f3f8;}
+  &.q6-9 {fill: #abd9e9;}
+  &.q7-9 {fill: #74add1;}
+  &.q8-9 {fill: #4575b4;}
+}
+.temp{
+  &.q0-9 {fill: #4575b4;}
+  &.q1-9 {fill: #74add1;}
+  &.q2-9 {fill: #abd9e9;}
+  &.q3-9 {fill: #e0f3f8;}
+  &.q4-9 {fill: #ffffbf;}
+  &.q5-9 {fill: #fee090;}
+  &.q6-9 {fill: #fdae61;}
+  &.q7-9 {fill: #f46d43;}
+  &.q8-9 {fill: #d73027;}
+  &:hover{fill: rgba(0,109,44,0.6);}
+}
 
 
 
