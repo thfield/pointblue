@@ -30,32 +30,35 @@
   };
 
   let margin = {top: 10, left: 10, bottom: 10, right: 10},
-      width = parseInt(d3.select('#map_container').style('width'))
-      // barchartWidth = parseInt(d3.select('#barchart_container').style('width')),
-  width = width - margin.left - margin.right
+      width = parseInt(d3.select('#map_container').style('width')),
+      barchartWidth = parseInt(d3.select('#barchart_container').style('width'))
+    width = width - margin.left - margin.right
   let mapRatio = 1,
       height = width * mapRatio,
-      // barchartHeight = (width)/3,
+      barchartHeight = (width)/3,
       scaleMultiplier = 18 // TODO: set this programmitically with bounding box from turf
 
-  // let x = d3.scale.ordinal()
-  //     .rangeRoundBands([0, barchartWidth], .1);
-  //
-  // let y = d3.scale.linear()
-  //     .range([barchartHeight, 0]);
-  //
-  // let xAxis = d3.svg.axis()
-  //     .scale(x)
-  //     .orient("bottom");
-  //
-  // let yAxis = d3.svg.axis()
-  //     .scale(y)
-  //     .orient("left")
-  //     .ticks(10);
+  let x = d3.scale.ordinal()
+      .rangeRoundBands([0, barchartWidth], .1);
+
+  let y = d3.scale.linear()
+      .range([barchartHeight, 0]);
+
+  let xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom");
+
+  let yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left")
+      .ticks(10);
 
   let mapsvg = d3.select('#map_container').append('svg')
       .attr('height', height)
       .attr('id','map')
+  var barsvg = d3.select('#barchart_container').append('svg')
+      .attr('height', barchartHeight)
+      .attr('id','barchart')
 
   let colorMap = d3.map(),
       keymap = []
@@ -76,7 +79,6 @@
   let path = d3.geo.path()
       .projection(projection)
 
-  // let legendsvg = d3.select('#legend').append('svg').append('g')
   mapsvg.append("g")
     .attr("class", "legendQuant")
     .attr("transform", "translate(0,10)");
@@ -105,6 +107,7 @@
     mapsvg.call(drawBoundaries);
     colorInBoundaries();
     drawLegend();
+    barsvg.call(drawBarChart);
   };
 
   function drawBoundaries(svg){
@@ -115,7 +118,7 @@
       .enter().append('path')
         .attr('class', Dataset.defaults.boundary)
         .attr('d', path)
-        // .on('click', function(d){ return dispatcher.changeGeo(d.id) })
+        .on('click', function(d){ return dispatcher.changeGeo(d.id) })
         .on('mouseover', function(d) {
           let me = d3.select(this),
               value = colorMap.get(d.id),
@@ -124,6 +127,86 @@
           return setTitle(value)
         })
         .on("mouseout", ttHide )
+  }
+
+  function drawBarChart(svg){
+    let param = Dataset.parameter()
+    d3.json('data/basin/1113810002.json', function(data){
+      let chart = svg.append('g').attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      x.domain(data.map(function(d) { return d.year}));
+      y.domain([0, d3.max(data, function(d) { return d[param]; } )]);
+      quantize.domain( y.domain() )
+
+      chart.append("g")
+          .attr("class", "x axis")
+          .attr("transform",  function(d) {
+            return 'translate(0,' + barchartHeight + ')'
+          })
+          .attr('text-anchor', 'start')
+          .call(xAxis)
+        .selectAll("text")
+          .attr("y", 0)
+          .attr("x", 9)
+          .attr("dy", ".35em")
+          .attr("transform", "rotate(-90)")
+          .style("text-anchor", "start");
+
+      chart.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        // .append("text")
+        //   .attr("transform", "rotate(-90)")
+        //   .attr("y", 6)
+        //   .attr("dy", ".71em")
+        //   .style("text-anchor", "end")
+        //   .text("Population");
+
+      chart.selectAll(".bar")
+          .data(data)
+        .enter().append("rect")
+          .attr('class', function(d){
+            return 'bar ' + quantize(d[param])
+          })
+          .attr("x", function(d) { return x(d.year); })
+          .attr("width", x.rangeBand())
+          .attr("y", function(d) { return y(d[param]); })
+          .attr("height", function(d) { return barchartHeight - y(d[param]); })
+          // .on('click', function(d){
+          //   return dispatcher.changeDemo(d.acs)
+          // })
+          .on("mouseover", function(d){
+            var me = d3.select(this),
+                thisText = d[param];
+            return ttFollow(me, thisText)
+          } )
+          .on("mouseout", ttHide );
+
+      // svg.append('text')
+      //   .attr("y", 16)
+      //   .attr("x", 25)
+      //   .attr("class", "tracttitle")
+      //   .text('Census Tract '+ currentTract )
+    });
+    svg.classed('hidden', true);
+  }
+
+  function changeBarChart(boundary){
+    let param = Dataset.parameter()
+    d3.json('data/basin/'+ boundary + '.json', function(data){
+      x.domain(data.map(function(d) { return d.year}));
+      y.domain([0, d3.max(data, function(d) { return d[param]; } )]);
+      quantize.domain( y.domain() )
+
+      var bars = d3.selectAll('.bar')
+      bars.data(data)
+          .attr('class', function(d){
+            return 'bar ' + quantize(d[param])
+          })
+          .attr("y", function(d) { return y(d[param]); })
+          .attr("height", function(d) { return barchartHeight - y(d[param]); })
+      barsvg.classed('hidden', false)
+    })
   }
 
   function colorInBoundaries(){
@@ -168,9 +251,8 @@
 
 
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear')
-  dispatcher.on('changeGeo', function(tract){
-    // currentTract = tract
-    // changeBarChart(tract)
+  dispatcher.on('changeGeo', function(geo){
+    changeBarChart(geo);
   })
   dispatcher.on('changeParameter', function(){
     console.log(Dataset.parameter())
@@ -192,22 +274,6 @@
       colorInBoundaries();
     })
   })
-
-
-
-  // function getDemographicCategories(gender,tract){
-  //   let result = []
-  //   for (let demog in selectKey){
-  //     let acs = selectKey[demog][gender],
-  //         val = censusData[tract][acs],
-  //         category = categoryDict[acs]//[0]
-  //
-  //     if ( !( (acs == 'B01001_002E') || (acs == 'B01001_026E') || (acs == 'x') ) ){
-  //       result.push({ acs:acs, val:+val, category:category })
-  //     }
-  //   }
-  //   return result
-  // }
 
 
   // function renderTiles(svg, type) {
@@ -274,9 +340,6 @@
 //     mapsvg.select('.censustracts').attr('d', path);
 //     mapsvg.selectAll('.censustract').attr('d', path);
 //
-// }
-// function layerHideShow(cb) {
-//   d3.select('.' + cb.name).classed('hidden', !cb.checked)
 // }
 
 function ttInit(element){
