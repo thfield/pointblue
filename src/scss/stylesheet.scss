@@ -9,6 +9,10 @@ svg{
 path{
   fill: none;
   stroke: #000;
+  // stroke-width: 0.5;
+}
+.hidden{
+  display: none;
 }
 
 
@@ -29,69 +33,35 @@ path{
     font-size: 12px;
     line-height: 20px;
   }
-  .hidden{
-    display: none;
-  }
 }
 
+/* legend */
+.label{
+  font-size: 10px;
+}
 
 /* structure */
 .chart-container{
-  /*width: 650px;*/
-  /*height: 650px;*/
-  /*background-color: #e8e8e8;*/
   display: inline-block;
 }
-.about{
-  font-size: .7em;
-}
-// TODO: change me!
-#map_container{
-  height: 500px;
-}
+
 
 /* osm road map */
-.major_road{ stroke: #444; }
-.minor_road{ stroke: #bbb; }
-.highway{ stroke: #111; stroke-width: 1.5px; }
+// .major_road{ stroke: #444; }
+// .minor_road{ stroke: #bbb; }
+// .highway{ stroke: #111; stroke-width: 1.5px; }
 
 
 /* colors */
-.watershed{
-  &.q0-9{ fill:rgba(247,251,255,0.6); }
-  &.q1-9{ fill:rgba(222,235,247,0.6); }
-  &.q2-9{ fill:rgba(198,219,239,0.6); }
-  &.q3-9{ fill:rgba(158,202,225,0.6); }
-  &.q4-9{ fill:rgba(107,174,214,0.6); }
-  &.q5-9{ fill:rgba(66,146,198,0.6); }
-  &.q6-9{ fill:rgba(33,113,181,0.6); }
-  &.q7-9{ fill:rgba(8,81,156,0.6); }
-  &.q8-9{ fill:rgba(8,48,107,0.6); }
-}
-
-.female{
-  &.q0-9{ fill:rgba(247,244,249,0.6) }
-  &.q1-9{ fill:rgba(231,225,239,0.6) }
-  &.q2-9{ fill:rgba(212,185,218,0.6) }
-  &.q3-9{ fill:rgba(201,148,199,0.6) }
-  &.q4-9{ fill:rgba(223,101,176,0.6) }
-  &.q5-9{ fill:rgba(231,41,138,0.6) }
-  &.q6-9{ fill:rgba(206,18,86,0.6) }
-  &.q7-9{ fill:rgba(152,0,67,0.6) }
-  &.q8-9{ fill:rgba(103,0,31,0.6) }
-}
-
-.both{
-  &.q0-9{ fill:rgba(247,252,245,0.6) }
-  &.q1-9{ fill:rgba(229,245,224,0.6) }
-  &.q2-9{ fill:rgba(199,233,192,0.6) }
-  &.q3-9{ fill:rgba(161,217,155,0.6) }
-  &.q4-9{ fill:rgba(116,196,118,0.6) }
-  &.q5-9{ fill:rgba(65,171,93,0.6) }
-  &.q6-9{ fill:rgba(35,139,69,0.6) }
-  &.q7-9{ fill:rgba(0,109,44,0.6) }
-  &.q8-9{ fill:rgba(0,68,27,0.6) }
-}
+.q0-9{fill:rgb(215,48,39)}
+.q1-9{fill:rgb(244,109,67)}
+.q2-9{fill:rgb(253,174,97)}
+.q3-9{fill:rgb(254,224,144)}
+.q4-9{fill:rgb(255,255,191)}
+.q5-9{fill:rgb(224,243,248)}
+.q6-9{fill:rgb(171,217,233)}
+.q7-9{fill:rgb(116,173,209)}
+.q8-9{fill:rgb(69,117,180)}
 
 .precip{
   &.q0-9 {fill: #d73027;}
@@ -121,12 +91,16 @@ path{
 
 /* bar chart */
 .bar{
-  stroke: #000;
+  // stroke: #000;
   &:hover{
-    fill: rgba(247, 91, 68, 0.5);
+    fill: rgb(35, 132, 67);
   }
 }
-/* census map */
-.watershed:hover{
-  fill: rgba(247, 91, 68, 0.5);
+/* choropleth map */
+.watershed{
+  // stroke-width: 0.5;
+    stroke: #7c7c7c;
+  &:hover{
+    fill: rgb(35, 132, 67);
+  }
 }

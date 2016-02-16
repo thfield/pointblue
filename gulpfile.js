@@ -31,7 +31,8 @@ gulp.task('vendor', function() {
     'node_modules/topojson/build/topojson.js',
     'node_modules/d3.chart/d3.chart.js',
     'node_modules/lodash/lodash.js',
-    'node_modules/d3-queue/build/queue.js'
+    'node_modules/d3-queue/build/queue.js',
+    'node_modules/d3-svg-legend/d3-legend.js'
   ];
   return gulp.src(assets)
       .pipe(gulp.dest('src/vendor'))
@@ -72,6 +73,26 @@ gulp.task('cdnize', ['useref'], function(){
             {
                 file: 'vendor/d3.js',
                 cdn: 'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.js'
+            },
+            {
+                file: 'vendor/d3-svg-legend.js',
+                cdn: 'https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.8.0/d3-legend.min.js'
+            },
+            {
+                file: 'vendor/index.js',
+                cdn: 'https://raw.githubusercontent.com/d3/d3-plugins/master/geo/tile/tile.js'
+            },
+            {
+                file: 'vendor/lodash.js',
+                cdn: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js'
+            },
+            {
+                file: 'vendor/queue.js',
+                cdn: 'https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js'
+            },
+            {
+                file: 'vendor/topojson.js',
+                cdn: 'https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js'
             }
         ]))
         .pipe(gulp.dest("./dist"));

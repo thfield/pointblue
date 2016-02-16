@@ -38,8 +38,9 @@
 
   function drawFirst(error, data, geo) {
     Dataset.rawData = data;
-    Dataset.topoFeat = topojson.feature(geo, geo.objects['watersheds.geo']).features;
-    drawMap(data);
+    let topoFeat = topojson.feature(geo, geo.objects['watersheds.geo']).features;
+    let dataBind = Dataset.dataByTract();
+    mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
   };
 
   function drawMap(data){
