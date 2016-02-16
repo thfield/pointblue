@@ -26,16 +26,43 @@
        if(tmpOptionText == annum) selList.selectedIndex = i;
      };
     }
-
   };
 
-  let margin = {top: 10, left: 10, bottom: 10, right: 10},
+  // tooltip methods
+  let tt = {
+    init: function(element){
+      d3.select(element).append('div')
+          .attr('id', 'tooltip')
+          .attr('class', 'hidden')
+        .append('span')
+          .attr('class', 'value')
+    },
+    follow: function(element, caption, options) {
+      element.on('mousemove', null);
+      element.on('mousemove', function() {
+        let position = d3.mouse(document.body);
+        d3.select('#tooltip')
+          .style('top', ( (position[1] + 30)) + "px")
+          .style('left', ( position[0]) + "px");
+        d3.select('#tooltip .value')
+          .html(caption);
+      });
+      d3.select('#tooltip').classed('hidden', false);
+    },
+    hide: function() {
+      d3.select('#tooltip').classed('hidden', true);
+    }
+  }
+
+
+
+  let margin = {top: 10, left: 30, bottom: 30, right: 10},
       width = parseInt(d3.select('#map_container').style('width')),
-      barchartWidth = parseInt(d3.select('#barchart_container').style('width'))
-    width = width - margin.left - margin.right
+      barchartWidth = parseInt(d3.select('#barchart_container').style('width')) - margin.left - margin.right
+    // width = width - margin.left - margin.right
   let mapRatio = 1,
       height = width * mapRatio,
-      barchartHeight = (width)/3,
+      barchartHeight = (width)/3- margin.top - margin.bottom,
       scaleMultiplier = 18 // TODO: set this programmitically with bounding box from turf
 
   let x = d3.scale.ordinal()
@@ -90,27 +117,42 @@
     .useClass(true)
     .scale(quantize);
 
-  ttInit('body')
+  tt.init('body')
+
+
 
   // download data and draw map
   queue()
     .defer(d3.json, 'data/annual/2009.json')
     .defer(d3.json, 'data/watersheds-topo2.json')
-    .await(drawFirst)
+    .defer(d3.json, 'data/basin/1113810002.json')
+    .await(renderFirst)
 
-  function drawFirst(error, data, geo) {
+  function renderFirst(error, data, geo, annual) {
     Dataset.rawData = data;
+    Dataset.basinData = annual;
     Dataset.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
     // let dataBind = Dataset.dataByTract();
     // mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
-    setColors(true);
-    mapsvg.call(drawBoundaries);
-    colorInBoundaries();
+    mapsvg.call(renderGeo);
+    colorGeo(true);
     drawLegend();
-    barsvg.call(drawBarChart);
+    barsvg.call(renderBarChart);
   };
 
-  function drawBoundaries(svg){
+
+
+  /* map drawing and updating methods :
+   * renderX = first time
+   * drawX   = general
+   * updateX = redraw
+   */
+  function drawLegend(){
+    mapsvg.select(".legendQuant")
+      .call(legend);
+  }
+
+  function renderGeo(svg){
     svg.append('g')
         .attr('class', 'geoBoundaries')
       .selectAll('.' + Dataset.defaults.boundary)
@@ -123,101 +165,85 @@
           let me = d3.select(this),
               value = colorMap.get(d.id),
               thisText = 'watershed id: ' + d.id + '<br> value: '+ prettify(value);
-          ttFollow(me, thisText)
-          return setTitle(value)
+          tt.follow(me, thisText)
+          // return setTitle(value)
         })
-        .on("mouseout", ttHide )
+        .on("mouseout", tt.hide )
   }
 
-  function drawBarChart(svg){
+  function renderBarChart(svg){
     let param = Dataset.parameter()
-    d3.json('data/basin/1113810002.json', function(data){
-      let chart = svg.append('g').attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    x.domain(Dataset.basinData.map(function(d) { return d.year}));
+    y.domain(d3.extent(Dataset.basinData, function(d) { return d[param]; } ));
+    let domain = y.domain();
+    if(param === 'temp'){ domain = [domain[1], domain[0]] }
+    quantize.domain(domain);
+    let chart = svg.append('g')//.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      x.domain(data.map(function(d) { return d.year}));
-      y.domain([0, d3.max(data, function(d) { return d[param]; } )]);
-      quantize.domain( y.domain() )
+    chart.append("g")
+        .attr("class", "x axis")
+        .attr("transform",  function(d) {
+          return 'translate(0,' + barchartHeight + ')'
+        })
+        .attr('text-anchor', 'start')
+        .call(xAxis)
+      .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
 
-      chart.append("g")
-          .attr("class", "x axis")
-          .attr("transform",  function(d) {
-            return 'translate(0,' + barchartHeight + ')'
-          })
-          .attr('text-anchor', 'start')
-          .call(xAxis)
-        .selectAll("text")
-          .attr("y", 0)
-          .attr("x", 9)
-          .attr("dy", ".35em")
-          .attr("transform", "rotate(-90)")
-          .style("text-anchor", "start");
-
-      chart.append("g")
-          .attr("class", "y axis")
-          .call(yAxis)
-        // .append("text")
-        //   .attr("transform", "rotate(-90)")
-        //   .attr("y", 6)
-        //   .attr("dy", ".71em")
-        //   .style("text-anchor", "end")
-        //   .text("Population");
-
-      chart.selectAll(".bar")
-          .data(data)
-        .enter().append("rect")
-          .attr('class', function(d){
-            return 'bar ' + quantize(d[param])
-          })
-          .attr("x", function(d) { return x(d.year); })
-          .attr("width", x.rangeBand())
-          .attr("y", function(d) { return y(d[param]); })
-          .attr("height", function(d) { return barchartHeight - y(d[param]); })
-          // .on('click', function(d){
-          //   return dispatcher.changeDemo(d.acs)
-          // })
-          .on("mouseover", function(d){
-            var me = d3.select(this),
-                thisText = d[param];
-            return ttFollow(me, thisText)
-          } )
-          .on("mouseout", ttHide );
-
-      // svg.append('text')
-      //   .attr("y", 16)
-      //   .attr("x", 25)
-      //   .attr("class", "tracttitle")
-      //   .text('Census Tract '+ currentTract )
-    });
-    svg.classed('hidden', true);
+    chart.append("g")
+        .attr("class", "y axis")
+        .attr("transform",  function(d) {
+          return 'translate('+margin.left+',0)'
+        })
+        .call(yAxis)
+    chart.selectAll(".bar")
+        .data(Dataset.basinData)
+      .enter().append("rect")
+        .attr('class', function(d){
+          return 'bar ' + quantize(d[param])
+        })
+        .attr("x", function(d) { return x(d.year); })
+        .attr("width", x.rangeBand())
+        .attr("y", function(d) { return y(d[param]); })
+        .attr("height", function(d) { return barchartHeight - y(d[param]); })
+        // .on('click', function(d){
+        //   return dispatcher.changeDemo(d.acs)
+        // })
+        .on("mouseover", function(d){
+          var me = d3.select(this),
+              thisText = d.year + ': '+ prettify(d[param]);
+          return tt.follow(me, thisText);
+        } )
+        .on("mouseout", tt.hide );
+    // svg.classed('hidden', true);
   }
 
-  function changeBarChart(boundary){
+  function updateBarChart(data){
     let param = Dataset.parameter()
-    d3.json('data/basin/'+ boundary + '.json', function(data){
-      x.domain(data.map(function(d) { return d.year}));
-      y.domain([0, d3.max(data, function(d) { return d[param]; } )]);
-      quantize.domain( y.domain() )
+    x.domain(data.map(function(d) {return d.year}));
+    y.domain(d3.extent(data, function(d) { return d[param]; } ));
+    let domain = y.domain();
+    if(param === 'temp'){ domain = [domain[1], domain[0]] }
+    quantize.domain(domain);
 
-      var bars = d3.selectAll('.bar')
-      bars.data(data)
-          .attr('class', function(d){
-            return 'bar ' + quantize(d[param])
-          })
-          .attr("y", function(d) { return y(d[param]); })
-          .attr("height", function(d) { return barchartHeight - y(d[param]); })
-      barsvg.classed('hidden', false)
-    })
+    let bars = d3.selectAll('.bar')
+    bars.data(data)
+        .attr('class', function(d){
+          return 'bar ' + quantize(d[param])
+        })
+        .attr("y", function(d) { return y(d[param]); })
+        .attr("height", function(d) { return barchartHeight - y(d[param]); })
+
+    d3.select('.y.axis').call(yAxis);
+    d3.select('.x.axis').call(xAxis);
+    // barsvg.classed('hidden', false);
   }
 
-  function colorInBoundaries(){
-    var boundaries = mapsvg.select('.geoBoundaries').selectAll('.'+ Dataset.defaults.boundary)
-    boundaries
-      .attr('class', function(d){
-        return Dataset.defaults.boundary+ ' ' + quantize(colorMap.get(d.id))
-      });
-  }
-
-  function setColors(reverse){
+  function colorGeo(reverse){
     keymap.length = 0
     let param = Dataset.parameter();
     keymap = Dataset.rawData.map((boundary)=>{
@@ -228,12 +254,16 @@
     if(reverse){ domain = [domain[1], domain[0]] }
     quantize.domain(domain);
     drawLegend();
+
+    let boundaries = mapsvg.select('.geoBoundaries').selectAll('.'+ Dataset.defaults.boundary)
+    boundaries
+      .attr('class', function(d){
+        return Dataset.defaults.boundary+ ' ' + quantize(colorMap.get(d.id))
+      });
   }
 
-  function drawLegend(){
-    mapsvg.select(".legendQuant")
-      .call(legend);
-  }
+
+
 
   /* page listeners */
   d3.select('#year-dropdown').on('change', function(){
@@ -249,19 +279,21 @@
 
 
 
-
+  /* dispatcher events */
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear')
   dispatcher.on('changeGeo', function(geo){
-    changeBarChart(geo);
+    d3.json( 'data/basin/'+ geo + '.json', function(data){
+      Dataset.basinData = data;
+      updateBarChart(Dataset.basinData)
+    })
   })
   dispatcher.on('changeParameter', function(){
-    console.log(Dataset.parameter())
     if (Dataset.parameter() === 'temp'){
-      setColors(true);
+      colorGeo(true);
     }else {
-      setColors();
+      colorGeo();
     };
-    colorInBoundaries();
+    updateBarChart(Dataset.basinData);
   })
   dispatcher.on('changeYear', function(year){
     if (year) {
@@ -270,8 +302,7 @@
     year = year || Dataset.year();
     d3.json('data/annual/'+ year +'.json', function(data){
       Dataset.rawData = data;
-      setColors();
-      colorInBoundaries();
+      colorGeo();
     })
   })
 
@@ -342,34 +373,12 @@
 //
 // }
 
-function ttInit(element){
-  d3.select(element).append('div')
-      .attr('id', 'tooltip')
-      .attr('class', 'hidden')
-    .append('span')
-      .attr('class', 'value')
-}
 
-function ttFollow(element, caption, options) {
-  element.on('mousemove', null);
-  element.on('mousemove', function() {
-    let position = d3.mouse(document.body);
-    d3.select('#tooltip')
-      .style('top', ( (position[1] + 30)) + "px")
-      .style('left', ( position[0]) + "px");
-    d3.select('#tooltip .value')
-      .html(caption);
-  });
-  d3.select('#tooltip').classed('hidden', false);
-};
 
-function ttHide() {
-  d3.select('#tooltip').classed('hidden', true);
-}
 
-function setTitle(newTitle){
-  d3.select('#selected-title').text(newTitle);
-}
+  function setTitle(newTitle){
+    d3.select('#selected-title').text(newTitle);
+  }
 
 
 // })()
