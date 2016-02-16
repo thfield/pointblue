@@ -32,11 +32,11 @@ key.forEach(function(basin){
       fs.accessSync(filename, fs.F_OK); //make sure the file is there
       let basinData = JSON.parse(fs.readFileSync(filename, 'utf8'))
       basinData = formatBasin(basinData);
+      convertToYearDict(basinData, basin.id);
 
+      //following 2 lines are duplicated in scripts/annualAverages.js
       let file = predictionModel+'/basin/'+basin.id+'.json'
       writeToFile(basinData,file)
-
-      convertToYearDict(basinData, basin.id);
     } catch (e) {
       // console.log('file not found')
         // It isn't accessible

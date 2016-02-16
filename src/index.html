@@ -52,6 +52,12 @@
         Click and drag to pan the map <br>
         Click on a watershed to show historical data in the bar chart
       </p>
+      <p>
+        <select name="model" id="model-dropdown">
+          <option value="HST" selected>Historical</option>
+          <option value="CCSM4_rcp85">CCSM4 RCP8.5</option>
+        </select>
+      </p>
     </form>
 
         <div id="map_container" class="eight columns chart-container"> </div>
@@ -77,7 +83,6 @@
 
 <!--build:js js/app.js -->
 <!-- <script src="js/draw.js"></script> -->
-<script src="js/setup.js" charset="utf-8"></script>
 <script src="js/app.js" charset="utf-8"></script>
 <!-- endbuild -->
 

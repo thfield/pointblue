@@ -1,12 +1,44 @@
 // (function() {
-  'use strict';
+  'use strict'
+  let dropdown = {
+    yearChooser: document.getElementById('year-dropdown'),
+    past: function(){
+      this.clearOptions()
+      for(let i=1920; i <2010; i++){
+        this.addOption(i);
+      }
+    },
+    future: function(){
+      this.clearOptions()
+      for(let i=2010; i <2099; i++){
+        this.addOption(i);
+      }
+    },
+    addOption: function(el,i, arr){
+      var option = document.createElement("option");
+      option.value = el;
+      option.text = el;
+      // if (el == '2009')
+      //   option.selected = true;
+      this.yearChooser.appendChild(option);
+    },
+    clearOptions: function(){
+      var myNode = this.yearChooser;
+      while (myNode.firstChild) {
+        myNode.removeChild(myNode.firstChild);
+      }
+    }
+  }
+
   let Dataset = {
     defaults: {
       parameter: 'temp',
-      year: 2009,
+      // year: 2009,
       boundary: 'watershed'
     },
-    predictionModel: 'HST',
+    model: function (){
+      return d3.select('#model-dropdown').node().value;
+    },
     dataByBoundary: function(val){
       let result = {}
       this.rawData.forEach((boundary)=>{
@@ -57,7 +89,7 @@
 
 
 
-
+  dropdown.past();
   let margin = {top: 0, left: 40, bottom: 40, right: 0},
       width = parseInt(d3.select('#map_container').style('width')),
       // width = window.getComputedStyle(document.getElementById("map_container"), null).getPropertyValue("width"),
@@ -146,8 +178,8 @@
   // download data and draw map
   queue()
     .defer(d3.json, 'data/watersheds-topo2.json')
-    .defer(d3.json, 'data/'+ Dataset.predictionModel +'/annual/2009.json')
-    .defer(d3.json, 'data/'+ Dataset.predictionModel +'/basin/1113810002.json')
+    .defer(d3.json, 'data/'+ Dataset.model() +'/annual/'+Dataset.year()+'.json')
+    .defer(d3.json, 'data/'+ Dataset.model() +'/basin/1113810002.json')
     .await(renderFirst)
 
   function renderFirst(error, geo, data, annual) {
@@ -303,15 +335,18 @@
   d3.select("#citywide").on('click', function(){
     dispatcher.changeGeo('citywide')
   });
+  d3.select('#model-dropdown').on('change', function(){
+    return dispatcher.changeModel()
+  })
   // d3.select(window).on('resize', resize);
 
 
 
 
   /* dispatcher events */
-  let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear')
+  let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear', 'changeModel')
   dispatcher.on('changeGeo', function(geo){
-    d3.json( 'data/'+ Dataset.predictionModel +'/basin/'+ geo + '.json', function(data){
+    d3.json( 'data/'+ Dataset.model() +'/basin/'+ geo + '.json', function(data){
       Dataset.basinData = data;
       updateBarChart(Dataset.basinData)
     })
@@ -329,10 +364,15 @@
       Dataset.setDropdown(year);
     }
     year = year || Dataset.year();
-    d3.json('data/'+ Dataset.predictionModel +'/annual/'+ year +'.json', function(data){
+    d3.json('data/'+ Dataset.model() +'/annual/'+ year +'.json', function(data){
       Dataset.rawData = data;
       colorGeo();
     })
+  })
+  dispatcher.on('changeModel', function(){
+    if(Dataset.model()==='HST'){ dropdown.past() }
+    else{ dropdown.future();}
+    // dispatcher.changeYear()
   })
 
 
