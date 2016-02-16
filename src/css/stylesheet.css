@@ -8,8 +8,7 @@ svg {
 
 path {
   fill: none;
-  stroke: #000;
-  stroke-width: 0.5; }
+  stroke: #000; }
 
 .hidden {
   display: none; }
@@ -71,6 +70,9 @@ path {
 .bar:hover {
   fill: #238443; }
 
-/* census map */
-.watershed:hover {
-  fill: #238443; }
+/* choropleth map */
+.watershed {
+  stroke-width: 0.5;
+  stroke: #fff; }
+  .watershed:hover {
+    fill: #238443; }

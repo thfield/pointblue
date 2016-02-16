@@ -9,7 +9,7 @@ svg{
 path{
   fill: none;
   stroke: #000;
-  stroke-width: 0.5;
+  // stroke-width: 0.5;
 }
 .hidden{
   display: none;
@@ -73,7 +73,11 @@ path{
     fill: rgb(35, 132, 67);
   }
 }
-/* census map */
-.watershed:hover{
-  fill: rgb(35, 132, 67);
+/* choropleth map */
+.watershed{
+  stroke-width: 0.5;
+  stroke: #fff;
+  &:hover{
+    fill: rgb(35, 132, 67);
+  }
 }

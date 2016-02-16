@@ -105,8 +105,16 @@
       .scale(width*scaleMultiplier)
       .translate([width / 2, height / 2])
 
+  var zoom = d3.behavior.zoom()
+      .translate([0, 0])
+      .scale(1)
+      .scaleExtent([1, 5])
+      .on("zoom", zoomed);
+
   let path = d3.geo.path()
       .projection(projection)
+
+  mapsvg.call(zoom)
 
   mapsvg.append("g")
     .attr("class", "legendQuant")
@@ -121,6 +129,13 @@
     .scale(quantize);
 
   tt.init('body')
+
+
+  function zoomed() {
+    var g = d3.select('#map_container .geoBoundaries');
+    // g.style("stroke-width", 1 / d3.event.scale + "px");
+    g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  }
 
 
 
