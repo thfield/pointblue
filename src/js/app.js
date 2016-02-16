@@ -52,6 +52,7 @@
     year: function (){
       return d3.select('#year-dropdown').node().value;
     },
+    geo: '1113810002',
     setDropdown: function(annum){
       let selList = document.getElementById('year-dropdown');
       for (let i = 0; i < selList.options.length; i++) {
@@ -87,9 +88,9 @@
     }
   }
 
-
-
   dropdown.past();
+
+
   let margin = {top: 0, left: 40, bottom: 40, right: 0},
       width = parseInt(d3.select('#map_container').style('width')),
       // width = window.getComputedStyle(document.getElementById("map_container"), null).getPropertyValue("width"),
@@ -179,7 +180,7 @@
   queue()
     .defer(d3.json, 'data/watersheds-topo2.json')
     .defer(d3.json, 'data/'+ Dataset.model() +'/annual/'+Dataset.year()+'.json')
-    .defer(d3.json, 'data/'+ Dataset.model() +'/basin/1113810002.json')
+    .defer(d3.json, 'data/'+ Dataset.model() +'/basin/'+Dataset.geo+'.json')
     .await(renderFirst)
 
   function renderFirst(error, geo, data, annual) {
@@ -327,16 +328,16 @@
 
   /* page listeners */
   d3.select('#year-dropdown').on('change', function(){
-    return dispatcher.changeYear()
+    return dispatcher.changeYear();
   })
   d3.selectAll('input[name=radio-parameter]').on('change', function(){
-    return dispatcher.changeParameter()
+    return dispatcher.changeParameter();
   })
   d3.select("#citywide").on('click', function(){
-    dispatcher.changeGeo('citywide')
+    dispatcher.changeGeo('citywide');
   });
   d3.select('#model-dropdown').on('change', function(){
-    return dispatcher.changeModel()
+    return dispatcher.changeModel();
   })
   // d3.select(window).on('resize', resize);
 
@@ -346,9 +347,10 @@
   /* dispatcher events */
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear', 'changeModel')
   dispatcher.on('changeGeo', function(geo){
+    Dataset.go = geo;
     d3.json( 'data/'+ Dataset.model() +'/basin/'+ geo + '.json', function(data){
       Dataset.basinData = data;
-      updateBarChart(Dataset.basinData)
+      updateBarChart(Dataset.basinData);
     })
   })
   dispatcher.on('changeParameter', function(){
@@ -370,9 +372,10 @@
     })
   })
   dispatcher.on('changeModel', function(){
-    if(Dataset.model()==='HST'){ dropdown.past() }
+    if(Dataset.model()==='HST'){ dropdown.past(); }
     else{ dropdown.future();}
-    // dispatcher.changeYear()
+    dispatcher.changeYear();
+    dispatcher.changeGeo(Dataset.geo);
   })
 
 
