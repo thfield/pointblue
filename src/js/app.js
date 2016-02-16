@@ -273,7 +273,10 @@
               thisText = d.year + ': '+ prettify(d[param]);
           return tt.follow(me, thisText);
         } )
-        .on("mouseout", tt.hide );
+        .on("mouseout", tt.hide )
+        .on('click', function(d){
+          return dispatcher.changeYear(d.year)
+        })
     // svg.classed('hidden', true);
   }
 
