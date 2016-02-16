@@ -96,8 +96,8 @@ gulp.task('cdnize', ['useref'], function(){
 
 // Build dist Task
 gulp.task('dist', ['cdnize'], function() {
-    return gulp.src('src/data/')
-        .pipe(gulp.dest('dist/data'))
+    return gulp.src('src/data/**/*.json')
+        .pipe(gulp.dest('dist/data/'))
 });
 
 // gulp.task('webpack', function() {
