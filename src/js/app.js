@@ -159,6 +159,7 @@
 
   let legend = d3.legend.color()
     .labelFormat(d3.format(".0f"))
+    // .ascending( ()=>{(Dataset.parameter() === 'temp') ? true : false })
     .shapeWidth(width*.8/9)
     .shapePadding(6)
     .orient('horizontal')
@@ -190,7 +191,7 @@
     // let dataBind = Dataset.dataByTract();
     // mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
     mapsvg.call(renderGeo);
-    colorGeo(true);
+    colorGeo();
     drawLegend();
     barsvg.call(renderBarChart);
   };
@@ -307,15 +308,17 @@
     // barsvg.classed('hidden', false);
   }
 
-  function colorGeo(reverse){
-    keymap.length = 0
+  function colorGeo(){
+    let reverse = false;
+    if (Dataset.parameter() === 'temp'){reverse = true};
+    keymap.length = 0;
     let param = Dataset.parameter();
     keymap = Dataset.rawData.map((boundary)=>{
       colorMap.set(boundary.id, +boundary[param]);
       return +boundary[param];
     })
-    let domain = d3.extent(keymap)
-    if(reverse){ domain = [domain[1], domain[0]] }
+    let domain = d3.extent(keymap);
+    if(reverse){ domain = [domain[1], domain[0]] };
     quantize.domain(domain);
     drawLegend();
 
@@ -357,11 +360,7 @@
     })
   })
   dispatcher.on('changeParameter', function(){
-    if (Dataset.parameter() === 'temp'){
-      colorGeo(true);
-    }else {
-      colorGeo();
-    };
+    colorGeo();
     updateBarChart(Dataset.basinData);
   })
   dispatcher.on('changeYear', function(year){
