@@ -353,7 +353,7 @@
   /* dispatcher events */
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear', 'changeModel')
   dispatcher.on('changeGeo', function(geo){
-    Dataset.go = geo;
+    Dataset.geo = geo;
     d3.json( 'data/'+ Dataset.model() +'/basin/'+ geo + '.json', function(data){
       Dataset.basinData = data;
       updateBarChart(Dataset.basinData);

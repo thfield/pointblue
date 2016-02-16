@@ -35,36 +35,39 @@
 
 
 
-  let Dataset = {
-    defaults: {
-      parameter: 'temp',
-      // year: 2009,
-      boundary: 'watershed'
-    },
-    selector: 'apples',
-    model: function (){
+  class Dataset {
+    constructor(selector){
+      this.selector = selector;
+      this.boundary = 'watershed';
+      this.geo = '1113810002';
+    }
+
+    model(){
       return d3.select('#'+this.selector+'-model-dropdown').node().value;
-    },
-    dataByBoundary: function(val){
+    }
+
+    dataByBoundary(val){
       let result = {}
       this.rawData.forEach((boundary)=>{
         result[boundary.id] = boundary[val];
       })
       return result;
-    },
-    parameter: function(){
+    }
+
+    parameter(){
         return d3.select('input[name=radio-parameter]:checked').node().value;
-    },
-    year: function (){
+    }
+
+    year(){
       return d3.select('#'+this.selector+'-year-dropdown').node().value;
-    },
-    geo: '1113810002',
-    setDropdown: function(annum){
+    }
+
+    setDropdown(annum){
       let selList = document.getElementById(this.selector+'-year-dropdown');
       for (let i = 0; i < selList.options.length; i++) {
        let tmpOptionText = selList.options[i].text;
        if(tmpOptionText == annum) selList.selectedIndex = i;
-     };
+     }
     }
   };
 
@@ -100,7 +103,7 @@
   let margin = {top: 0, left: 40, bottom: 40, right: 0},
       width = parseInt(d3.select('#map_container').style('width')),
       // width = window.getComputedStyle(document.getElementById("map_container"), null).getPropertyValue("width"),
-      barchartWidth = parseInt(d3.select('#barchart_container').style('width')) - margin.left - margin.right
+      barchartWidth = parseInt(d3.select('#apples').style('width')) - margin.left - margin.right
     // width = width - margin.left - margin.right
   let mapRatio = 1,
       height = width * mapRatio,
@@ -125,7 +128,7 @@
   let mapsvg = d3.select('#map_container').append('svg')
       .attr('height', height)
       .attr('id','map')
-  var barsvg = d3.select('#barchart_container').append('svg')
+  var barsvg = d3.select('#apples').append('svg')
       .attr('height', barchartHeight)
       .attr('id','barchart')
 
@@ -182,24 +185,26 @@
   }
 
 
+let apples = new Dataset('apples'),
+    oranges = new Dataset('oranges')
 
   // download data and draw map
   queue()
     .defer(d3.json, 'data/watersheds-topo2.json')
-    .defer(d3.json, 'data/'+ Dataset.model() +'/annual/'+Dataset.year()+'.json')
-    .defer(d3.json, 'data/'+ Dataset.model() +'/basin/'+Dataset.geo+'.json')
+    .defer(d3.json, 'data/'+ apples.model() +'/annual/'+apples.year()+'.json')
+    .defer(d3.json, 'data/'+ apples.model() +'/basin/'+apples.geo+'.json')
     .await(renderFirst)
 
   function renderFirst(error, geo, data, annual) {
-    Dataset.rawData = data;
-    Dataset.basinData = annual;
-    Dataset.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
-    // let dataBind = Dataset.dataByTract();
+    apples.rawData = data;
+    apples.basinData = annual;
+    apples.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
+    // let dataBind = apples.dataByTract();
     // mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
-    mapsvg.call(renderGeo);
-    colorGeo();
+    mapsvg.call(renderGeo, apples);
+    colorGeo(apples);
     drawLegend();
-    barsvg.call(renderBarChart);
+    barsvg.call(renderBarChart, apples);
   };
 
 
@@ -214,12 +219,12 @@
       .call(legend);
   }
 
-  function renderGeo(svg){
+  function renderGeo(svg, dataset){
     d3.select('.geoBoundaries')
-      .selectAll('.' + Dataset.defaults.boundary)
-        .data(Dataset.topo)
+      .selectAll('.' + dataset.boundary)
+        .data(dataset.topo)
       .enter().append('path')
-        .attr('class', Dataset.defaults.boundary)
+        .attr('class', dataset.boundary)
         .attr('d', path)
         .on('click', function(d){ return dispatcher.changeGeo(d.id) })
         .on('mouseover', function(d) {
@@ -232,10 +237,10 @@
         .on("mouseout", tt.hide )
   }
 
-  function renderBarChart(svg){
-    let param = Dataset.parameter()
-    x.domain(Dataset.basinData.map(function(d) { return d.year}));
-    y.domain(d3.extent(Dataset.basinData, function(d) { return d[param]; } ));
+  function renderBarChart(svg, dataset){
+    let param = dataset.parameter()
+    x.domain(dataset.basinData.map(function(d) { return d.year}));
+    y.domain(d3.extent(dataset.basinData, function(d) { return d[param]; } ));
     let domain = y.domain();
     if(param === 'temp'){ domain = [domain[1], domain[0]] }
     quantize.domain(domain);
@@ -262,7 +267,7 @@
         })
         .call(yAxis)
     chart.selectAll(".bar")
-        .data(Dataset.basinData)
+        .data(dataset.basinData)
       .enter().append("rect")
       // .enter().append("circle")
         .attr('class', function(d){
@@ -287,16 +292,16 @@
     // svg.classed('hidden', true);
   }
 
-  function updateBarChart(data){
-    let param = Dataset.parameter()
-    x.domain(data.map(function(d) {return d.year}));
-    y.domain(d3.extent(data, function(d) { return d[param]; } ));
+  function updateBarChart(dataset){
+    let param = dataset.parameter()
+    x.domain(dataset.basinData.map(function(d) {return d.year}));
+    y.domain(d3.extent(dataset.basinData, function(d) { return d[param]; } ));
     let domain = y.domain();
     if(param === 'temp'){ domain = [domain[1], domain[0]] }
     quantize.domain(domain);
 
     let bars = d3.selectAll('.bar')
-    bars.data(data)
+    bars.data(dataset.basinData)
         .attr('class', function(d){
           return 'bar ' + quantize(d[param])
         })
@@ -314,12 +319,12 @@
     // barsvg.classed('hidden', false);
   }
 
-  function colorGeo(){
+  function colorGeo(dataset){
     let reverse = false;
-    if (Dataset.parameter() === 'temp'){reverse = true};
+    if (dataset.parameter() === 'temp'){reverse = true};
     keymap.length = 0;
-    let param = Dataset.parameter();
-    keymap = Dataset.rawData.map((boundary)=>{
+    let param = dataset.parameter();
+    keymap = dataset.rawData.map((boundary)=>{
       colorMap.set(boundary.id, +boundary[param]);
       return +boundary[param];
     })
@@ -328,10 +333,10 @@
     quantize.domain(domain);
     drawLegend();
 
-    let boundaries = mapsvg.select('.geoBoundaries').selectAll('.'+ Dataset.defaults.boundary)
+    let boundaries = mapsvg.select('.geoBoundaries').selectAll('.'+ dataset.boundary)
     boundaries
       .attr('class', function(d){
-        return Dataset.defaults.boundary+ ' ' + quantize(colorMap.get(d.id))
+        return dataset.boundary+ ' ' + quantize(colorMap.get(d.id))
       });
   }
 
@@ -339,16 +344,13 @@
 
 
   /* page listeners */
-  d3.select('#year-dropdown').on('change', function(){
+  d3.select('#apples-year-dropdown').on('change', function(){
     return dispatcher.changeYear();
   })
   d3.selectAll('input[name=radio-parameter]').on('change', function(){
     return dispatcher.changeParameter();
   })
-  d3.select("#citywide").on('click', function(){
-    dispatcher.changeGeo('citywide');
-  });
-  d3.select('#model-dropdown').on('change', function(){
+  d3.select('#apples-model-dropdown').on('change', function(){
     return dispatcher.changeModel();
   })
   // d3.select(window).on('resize', resize);
@@ -359,31 +361,31 @@
   /* dispatcher events */
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear', 'changeModel')
   dispatcher.on('changeGeo', function(geo){
-    Dataset.go = geo;
-    d3.json( 'data/'+ Dataset.model() +'/basin/'+ geo + '.json', function(data){
-      Dataset.basinData = data;
-      updateBarChart(Dataset.basinData);
+    apples.geo = geo;
+    d3.json( 'data/'+ apples.model() +'/basin/'+ geo + '.json', function(data){
+      apples.basinData = data;
+      updateBarChart(apples);
     })
   })
   dispatcher.on('changeParameter', function(){
-    colorGeo();
-    updateBarChart(Dataset.basinData);
+    colorGeo(apples);
+    updateBarChart(apples);
   })
   dispatcher.on('changeYear', function(year){
     if (year) {
-      Dataset.setDropdown(year);
+      apples.setDropdown(year);
     }
-    year = year || Dataset.year();
-    d3.json('data/'+ Dataset.model() +'/annual/'+ year +'.json', function(data){
-      Dataset.rawData = data;
-      colorGeo();
+    year = year || apples.year();
+    d3.json('data/'+ apples.model() +'/annual/'+ year +'.json', function(data){
+      apples.rawData = data;
+      colorGeo(apples);
     })
   })
   dispatcher.on('changeModel', function(){
-    if(Dataset.model()==='HST'){ dropdown.past(); }
-    else{ dropdown.future();}
+    if(apples.model()==='HST'){ dropdown('apples', 'past'); }
+    else{ dropdown('apples','future');}
     dispatcher.changeYear();
-    dispatcher.changeGeo(Dataset.geo);
+    dispatcher.changeGeo(apples.geo);
   })
 
 
@@ -443,7 +445,7 @@
   //
   //   // resize the map
   //   mapsvg.select('.geoBoundaries').attr('d', path);
-  //   mapsvg.selectAll('.' + Dataset.defaults.boundary).attr('d', path);
+  //   mapsvg.selectAll('.' + Dataset.boundary).attr('d', path);
   // }
 
 
