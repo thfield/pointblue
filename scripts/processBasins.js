@@ -16,7 +16,7 @@ const Converter = require('csvtojson').Converter;
 let key = JSON.parse(fs.readFileSync('key.json', 'utf8'))
 let output = {};
 let outputfile = 'data.json';
-let predictionModel = 'HST';
+let predictionModel = 'CCSM4_rcp85';
 let converter = new Converter({});
 let everyBasin = [];
 
@@ -27,11 +27,15 @@ let testKey = [{ id: '1113810002', name: 'Robinson Creek' },
 // key = key.slice(0,5); //remove for all basins!
 
 key.forEach(function(basin){
-  let filename = 'raw/json/SFB-PWS-' + basin.id + '-' + predictionModel + '.json';
+  let filename = 'raw/'+predictionModel+'/SFB-PWS-' + basin.id + '-' + predictionModel + '.json';
     try {
       fs.accessSync(filename, fs.F_OK); //make sure the file is there
       let basinData = JSON.parse(fs.readFileSync(filename, 'utf8'))
       basinData = formatBasin(basinData);
+
+      let file = predictionModel+'/basin/'+basin.id+'.json'
+      writeToFile(basinData,file)
+
       convertToYearDict(basinData, basin.id);
     } catch (e) {
       // console.log('file not found')
@@ -40,7 +44,7 @@ key.forEach(function(basin){
 })
 
 for (let year in output){
-  let file = 'annual/'+year+'.json'
+  let file = predictionModel+'/annual/'+year+'.json'
   writeToFile(output[year],file);
 }
 

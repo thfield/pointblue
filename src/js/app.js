@@ -6,6 +6,7 @@
       year: 2009,
       boundary: 'watershed'
     },
+    predictionModel: 'HST',
     dataByBoundary: function(val){
       let result = {}
       this.rawData.forEach((boundary)=>{
@@ -144,12 +145,12 @@
 
   // download data and draw map
   queue()
-    .defer(d3.json, 'data/annual/2009.json')
     .defer(d3.json, 'data/watersheds-topo2.json')
-    .defer(d3.json, 'data/basin/1113810002.json')
+    .defer(d3.json, 'data/'+ Dataset.predictionModel +'/annual/2009.json')
+    .defer(d3.json, 'data/'+ Dataset.predictionModel +'/basin/1113810002.json')
     .await(renderFirst)
 
-  function renderFirst(error, data, geo, annual) {
+  function renderFirst(error, geo, data, annual) {
     Dataset.rawData = data;
     Dataset.basinData = annual;
     Dataset.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
@@ -310,7 +311,7 @@
   /* dispatcher events */
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear')
   dispatcher.on('changeGeo', function(geo){
-    d3.json( 'data/basin/'+ geo + '.json', function(data){
+    d3.json( 'data/'+ Dataset.predictionModel +'/basin/'+ geo + '.json', function(data){
       Dataset.basinData = data;
       updateBarChart(Dataset.basinData)
     })
@@ -328,7 +329,7 @@
       Dataset.setDropdown(year);
     }
     year = year || Dataset.year();
-    d3.json('data/annual/'+ year +'.json', function(data){
+    d3.json('data/'+ Dataset.predictionModel +'/annual/'+ year +'.json', function(data){
       Dataset.rawData = data;
       colorGeo();
     })
