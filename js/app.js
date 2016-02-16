@@ -1,25 +1,43 @@
-'use strict'
-let years=['1920','1921','1922','1923','1924','1925','1926','1927','1928','1929','1930','1931','1932','1933','1934','1935','1936','1937','1938','1939','1940','1941','1942','1943','1944','1945','1946','1947','1948','1949','1950','1951','1952','1953','1954','1955','1956','1957','1958','1959','1960','1961','1962','1963','1964','1965','1966','1967','1968','1969','1970','1971','1972','1973','1974','1975','1976','1977','1978','1979','1980','1981','1982','1983','1984','1985','1986','1987','1988','1989','1990','1991','1992','1993','1994','1995','1996','1997','1998','1999','2000','2001','2002','2003','2004','2005','2006','2007','2008','2009']
-let yearChooser = document.getElementById('year-dropdown');
-
-years.forEach(addOption, yearChooser);
-
-function addOption(el,i, arr){
-  var option = document.createElement("option");
-  option.value = el;
-  option.text = el;
-  if (el == '2009')
-    option.selected = true;
-  this.appendChild(option);
-}
-
 // (function() {
-  'use strict';
+  'use strict'
+  let dropdown = {
+    yearChooser: document.getElementById('year-dropdown'),
+    past: function(){
+      this.clearOptions()
+      for(let i=1920; i <2010; i++){
+        this.addOption(i);
+      }
+    },
+    future: function(){
+      this.clearOptions()
+      for(let i=2010; i <2099; i++){
+        this.addOption(i);
+      }
+    },
+    addOption: function(el,i, arr){
+      var option = document.createElement("option");
+      option.value = el;
+      option.text = el;
+      // if (el == '2009')
+      //   option.selected = true;
+      this.yearChooser.appendChild(option);
+    },
+    clearOptions: function(){
+      var myNode = this.yearChooser;
+      while (myNode.firstChild) {
+        myNode.removeChild(myNode.firstChild);
+      }
+    }
+  }
+
   let Dataset = {
     defaults: {
       parameter: 'temp',
-      year: 2009,
+      // year: 2009,
       boundary: 'watershed'
+    },
+    model: function (){
+      return d3.select('#model-dropdown').node().value;
     },
     dataByBoundary: function(val){
       let result = {}
@@ -34,6 +52,7 @@ function addOption(el,i, arr){
     year: function (){
       return d3.select('#year-dropdown').node().value;
     },
+    geo: '1113810002',
     setDropdown: function(annum){
       let selList = document.getElementById('year-dropdown');
       for (let i = 0; i < selList.options.length; i++) {
@@ -69,7 +88,7 @@ function addOption(el,i, arr){
     }
   }
 
-
+  dropdown.past();
 
 
   let margin = {top: 0, left: 40, bottom: 40, right: 0},
@@ -159,12 +178,12 @@ function addOption(el,i, arr){
 
   // download data and draw map
   queue()
-    .defer(d3.json, 'data/annual/2009.json')
     .defer(d3.json, 'data/watersheds-topo2.json')
-    .defer(d3.json, 'data/basin/1113810002.json')
+    .defer(d3.json, 'data/'+ Dataset.model() +'/annual/'+Dataset.year()+'.json')
+    .defer(d3.json, 'data/'+ Dataset.model() +'/basin/'+Dataset.geo+'.json')
     .await(renderFirst)
 
-  function renderFirst(error, data, geo, annual) {
+  function renderFirst(error, geo, data, annual) {
     Dataset.rawData = data;
     Dataset.basinData = annual;
     Dataset.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
@@ -254,7 +273,10 @@ function addOption(el,i, arr){
               thisText = d.year + ': '+ prettify(d[param]);
           return tt.follow(me, thisText);
         } )
-        .on("mouseout", tt.hide );
+        .on("mouseout", tt.hide )
+        .on('click', function(d){
+          return dispatcher.changeYear(d.year)
+        })
     // svg.classed('hidden', true);
   }
 
@@ -309,25 +331,29 @@ function addOption(el,i, arr){
 
   /* page listeners */
   d3.select('#year-dropdown').on('change', function(){
-    return dispatcher.changeYear()
+    return dispatcher.changeYear();
   })
   d3.selectAll('input[name=radio-parameter]').on('change', function(){
-    return dispatcher.changeParameter()
+    return dispatcher.changeParameter();
   })
   d3.select("#citywide").on('click', function(){
-    dispatcher.changeGeo('citywide')
+    dispatcher.changeGeo('citywide');
   });
+  d3.select('#model-dropdown').on('change', function(){
+    return dispatcher.changeModel();
+  })
   // d3.select(window).on('resize', resize);
 
 
 
 
   /* dispatcher events */
-  let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear')
+  let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear', 'changeModel')
   dispatcher.on('changeGeo', function(geo){
-    d3.json( 'data/basin/'+ geo + '.json', function(data){
+    Dataset.go = geo;
+    d3.json( 'data/'+ Dataset.model() +'/basin/'+ geo + '.json', function(data){
       Dataset.basinData = data;
-      updateBarChart(Dataset.basinData)
+      updateBarChart(Dataset.basinData);
     })
   })
   dispatcher.on('changeParameter', function(){
@@ -343,10 +369,16 @@ function addOption(el,i, arr){
       Dataset.setDropdown(year);
     }
     year = year || Dataset.year();
-    d3.json('data/annual/'+ year +'.json', function(data){
+    d3.json('data/'+ Dataset.model() +'/annual/'+ year +'.json', function(data){
       Dataset.rawData = data;
       colorGeo();
     })
+  })
+  dispatcher.on('changeModel', function(){
+    if(Dataset.model()==='HST'){ dropdown.past(); }
+    else{ dropdown.future();}
+    dispatcher.changeYear();
+    dispatcher.changeGeo(Dataset.geo);
   })
 
 
