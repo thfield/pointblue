@@ -114,6 +114,9 @@
   let path = d3.geo.path()
       .projection(projection)
 
+  mapsvg.append('g')
+      .attr('class', 'geoBoundaries')
+
   mapsvg.call(zoom)
 
   mapsvg.append("g")
@@ -133,7 +136,7 @@
 
   function zoomed() {
     var g = d3.select('#map_container .geoBoundaries');
-    // g.style("stroke-width", 1 / d3.event.scale + "px");
+    g.style("stroke-width", 1 / d3.event.scale + "px");
     g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
   }
 
@@ -171,8 +174,7 @@
   }
 
   function renderGeo(svg){
-    svg.append('g')
-        .attr('class', 'geoBoundaries')
+    d3.select('.geoBoundaries')
       .selectAll('.' + Dataset.defaults.boundary)
         .data(Dataset.topo)
       .enter().append('path')
@@ -257,6 +259,11 @@
         // .attr("cy", function(d) { return y(d[param]); })
         .attr("y", function(d) { return y(d[param]); })
         .attr("height", function(d) { return barchartHeight - y(d[param]); })
+        .on("mouseover", function(d){
+          var me = d3.select(this),
+              thisText = d.year + ': '+ prettify(d[param]);
+          return tt.follow(me, thisText);
+        })
 
     d3.select('.y.axis').call(yAxis);
     // d3.select('.x.axis').call(xAxis);

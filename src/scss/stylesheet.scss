@@ -75,8 +75,8 @@ path{
 }
 /* choropleth map */
 .watershed{
-  stroke-width: 0.5;
-  stroke: #fff;
+  // stroke-width: 0.5;
+    stroke: #7c7c7c;
   &:hover{
     fill: rgb(35, 132, 67);
   }
