@@ -79,10 +79,6 @@ gulp.task('cdnize', ['useref'], function(){
                 cdn: 'https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.8.0/d3-legend.min.js'
             },
             {
-                file: 'vendor/index.js',
-                cdn: 'https://raw.githubusercontent.com/d3/d3-plugins/master/geo/tile/tile.js'
-            },
-            {
                 file: 'vendor/lodash.js',
                 cdn: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js'
             },
