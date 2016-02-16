@@ -13,11 +13,12 @@
   <link rel="stylesheet" href="css/styles.vendor.css">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.js" charset="utf-8"></script>
-  <script src="vendor/topojson.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js" charset="utf-8"></script>
   <script src="vendor/index.js"></script>
-  <script src="vendor/d3.chart.js"></script>
-  <script src="vendor/queue.js"></script>
-  <script src="vendor/lodash.js"></script>
+  <!-- <script src="vendor/d3.chart.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+  <script src="vendor/d3-legend.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script> -->
 </head>
 
 <body>
@@ -26,17 +27,26 @@
   <div class="row">
     <form id="controls" class="four columns">
       <p>
-        about text goes here
+        Watersheds in the SF Bay area
       </p>
 
       <p>
-        <input type="radio" name="radio-category" value='temp' checked>Temperature</input>
-        <input type="radio" name="radio-category" value='precip'>Precipitation</input>
-        <select name="year" id="year-dropdown">
-
-        </select>
+        <input type="radio" name="radio-parameter" value='temp' checked>Temperature</input>
+        <input type="radio" name="radio-parameter" value='precip'>Precipitation</input>
+        <select name="year" id="year-dropdown"></select>
       </p>
       <div id="selected-title"></div>
+      <div id="legend"></div>
+      <p>
+        For each watershed area:<br>
+        -Temperature shows the average temperature for the calendar year<br>
+        -Precipitation is the total precipitation for the calendar year
+      </p>
+      <p>
+        Use the mousewheel to zoom <br>
+        Click and drag to pan the map <br>
+        Click on a watershed to show historical data in the bar chart
+      </p>
     </form>
 
         <div id="map_container" class="eight columns chart-container"> </div>
@@ -45,13 +55,12 @@
   </div>
 
   <div class="row">
-    <!-- <div id="barchart_container" class="twelve columns chart-container"> </div> -->
-
+    <div id="barchart_container" class="twelve columns chart-container"> </div>
   </div>
 
   <div class="row">
-    <div class="eleven columns about">
-      Footer stuff goes here
+    <div class="eleven columns">
+
     </div>
   </div>
 </div>

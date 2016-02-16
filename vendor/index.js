@@ -1,4 +1,4 @@
-
+// module.exports = function() {
   d3.geo.tile = function() {
     var size = [960, 500],
         scale = 256,
@@ -52,3 +52,4 @@
 
     return tile;
   };
+// };
