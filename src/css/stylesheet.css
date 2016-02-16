@@ -40,9 +40,6 @@ path {
   /*background-color: #e8e8e8;*/
   display: inline-block; }
 
-.about {
-  font-size: .7em; }
-
 /* osm road map */
 .major_road {
   stroke: #444; }

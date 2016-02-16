@@ -56,13 +56,15 @@
 
 
 
-  let margin = {top: 10, left: 30, bottom: 30, right: 10},
+
+  let margin = {top: 0, left: 40, bottom: 40, right: 0},
       width = parseInt(d3.select('#map_container').style('width')),
+      // width = window.getComputedStyle(document.getElementById("map_container"), null).getPropertyValue("width"),
       barchartWidth = parseInt(d3.select('#barchart_container').style('width')) - margin.left - margin.right
     // width = width - margin.left - margin.right
   let mapRatio = 1,
       height = width * mapRatio,
-      barchartHeight = (width)/3- margin.top - margin.bottom,
+      barchartHeight = (width/3)- margin.top - margin.bottom,
       scaleMultiplier = 18 // TODO: set this programmitically with bounding box from turf
 
   let x = d3.scale.ordinal()
@@ -95,8 +97,8 @@
 
   let prettify = d3.format(".01f")
 
-  let tiler = d3.geo.tile()
-      .size([width, height])
+  // let tiler = d3.geo.tile()
+  //     .size([width, height])
 
   let projection = d3.geo.mercator()
       .center([-122.31, 37.95])
@@ -112,7 +114,8 @@
 
   let legend = d3.legend.color()
     .labelFormat(d3.format(".0f"))
-    .shapeWidth(width/9)
+    .shapeWidth(width*.8/9)
+    .shapePadding(6)
     .orient('horizontal')
     .useClass(true)
     .scale(quantize);
@@ -164,7 +167,7 @@
         .on('mouseover', function(d) {
           let me = d3.select(this),
               value = colorMap.get(d.id),
-              thisText = 'watershed id: ' + d.id + '<br> value: '+ prettify(value);
+              thisText = d.properties.name + '<br>watershed id: ' + d.id + '<br> value: '+ prettify(value);
           tt.follow(me, thisText)
           // return setTitle(value)
         })
@@ -203,16 +206,17 @@
     chart.selectAll(".bar")
         .data(Dataset.basinData)
       .enter().append("rect")
+      // .enter().append("circle")
         .attr('class', function(d){
           return 'bar ' + quantize(d[param])
         })
+        // .attr("cx", function(d) { return x(d.year); })
+        // .attr("cy", function(d) { return y(d[param]); })
+        // .attr("r", '5')
         .attr("x", function(d) { return x(d.year); })
         .attr("width", x.rangeBand())
         .attr("y", function(d) { return y(d[param]); })
         .attr("height", function(d) { return barchartHeight - y(d[param]); })
-        // .on('click', function(d){
-        //   return dispatcher.changeDemo(d.acs)
-        // })
         .on("mouseover", function(d){
           var me = d3.select(this),
               thisText = d.year + ': '+ prettify(d[param]);
@@ -235,11 +239,12 @@
         .attr('class', function(d){
           return 'bar ' + quantize(d[param])
         })
+        // .attr("cy", function(d) { return y(d[param]); })
         .attr("y", function(d) { return y(d[param]); })
         .attr("height", function(d) { return barchartHeight - y(d[param]); })
 
     d3.select('.y.axis').call(yAxis);
-    d3.select('.x.axis').call(xAxis);
+    // d3.select('.x.axis').call(xAxis);
     // barsvg.classed('hidden', false);
   }
 
@@ -276,6 +281,7 @@
     dispatcher.changeGeo('citywide')
   });
   // d3.select(window).on('resize', resize);
+
 
 
 
@@ -329,49 +335,42 @@
   //       })
   // }
 
-//   function resize() {
-//     // adjust things when the window size changes
-//     width = parseInt(d3.select('#map_container').style('width'));
-//     barchartWidth = parseInt(d3.select('#barchart_container').style('width'));
-//     width = width - margin.left - margin.right;
-//     height = width * mapRatio;
-//
-//     // update projection
-//     projection
-//         .translate([width / 2, height / 2])
-//         .scale(width*scaleMultiplier);
-//     x.rangeRoundBands([0, barchartWidth], .1);
-//     xAxis.scale(x)
-//     barsvg.select(".x.axis")
-//         .call(xAxis)
-//     barsvg.selectAll(".x text")
-//           .attr("y", 0)
-//           .attr("x", 9)
-//           .attr("dy", ".35em")
-//           .style("text-anchor", "start")
-//
-//     // resize the map container
-//     mapsvg
-//         .style('width', width + 'px')
-//         .style('height', height + 'px');
-//     barsvg
-//         .style('width', barchartWidth + 'px');
-//
-//     barsvg.selectAll(".bar")
-//       .attr("width", x.rangeBand())
-//       .attr("x", function(d) { return x(d.category); })
-//
-//     // resize the map
-//     mapsvg.select('.neighborhoods').attr('d', path);
-//     mapsvg.selectAll('.neighborhood').attr('d', path);
-//     mapsvg.select('.highroad').attr('d', path);
-//     mapsvg.selectAll('.minor_road').attr('d', path);
-//     mapsvg.selectAll('.major_road').attr('d', path);
-//     mapsvg.selectAll('.highway').attr('d', path);
-//     mapsvg.select('.censustracts').attr('d', path);
-//     mapsvg.selectAll('.censustract').attr('d', path);
-//
-// }
+  // function resize() {
+  //   // adjust things when the window size changes
+  //   width = parseInt(d3.select('#map_container').style('width'));
+  //   barchartWidth = parseInt(d3.select('#barchart_container').style('width'));
+  //   width = width - margin.left - margin.right;
+  //   height = width * mapRatio;
+  //
+  //   // update projection
+  //   projection
+  //       .translate([width / 2, height / 2])
+  //       .scale(width*scaleMultiplier);
+  //   x.rangeRoundBands([0, barchartWidth], .1);
+  //   xAxis.scale(x)
+  //   barsvg.select(".x.axis")
+  //       .call(xAxis)
+  //   barsvg.selectAll(".x text")
+  //         .attr("y", 0)
+  //         .attr("x", 9)
+  //         .attr("dy", ".35em")
+  //         .style("text-anchor", "start")
+  //
+  //   // resize the map container
+  //   mapsvg
+  //       .style('width', width + 'px')
+  //       .style('height', height + 'px');
+  //   barsvg
+  //       .style('width', barchartWidth + 'px');
+  //
+  //   barsvg.selectAll(".bar")
+  //     .attr("width", x.rangeBand())
+  //     .attr("x", function(d) { return x(d.category); })
+  //
+  //   // resize the map
+  //   mapsvg.select('.geoBoundaries').attr('d', path);
+  //   mapsvg.selectAll('.' + Dataset.defaults.boundary).attr('d', path);
+  // }
 
 
 
