@@ -8,7 +8,8 @@ svg {
 
 path {
   fill: none;
-  stroke: #000; }
+  stroke: #000;
+  stroke-width: 0.5; }
 
 .hidden {
   display: none; }
@@ -35,22 +36,9 @@ path {
 
 /* structure */
 .chart-container {
-  /*width: 650px;*/
-  /*height: 650px;*/
-  /*background-color: #e8e8e8;*/
   display: inline-block; }
 
 /* osm road map */
-.major_road {
-  stroke: #444; }
-
-.minor_road {
-  stroke: #bbb; }
-
-.highway {
-  stroke: #111;
-  stroke-width: 1.5px; }
-
 /* colors */
 .q0-9 {
   fill: #d73027; }
@@ -80,6 +68,9 @@ path {
   fill: #4575b4; }
 
 /* bar chart */
+.bar:hover {
+  fill: #238443; }
+
 /* census map */
 .watershed:hover {
   fill: #238443; }
