@@ -371,8 +371,8 @@
   d3.selectAll('.model-dropdown').on('change', function(){
     return dispatcher.changeModel(this.classList[0]);
   })
-  d3.select('input[name=radio-parameter]').on('change', function(){
-    return dispatcher.changeParameter;
+  d3.selectAll('input[name=radio-parameter]').on('change', function(){
+    return dispatcher.changeParameter();
   })
 
   // d3.select(window).on('resize', resize);

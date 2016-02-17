@@ -350,7 +350,7 @@ let defaultData = new Dataset('defaultData')
     return dispatcher.changeYear();
   })
   d3.selectAll('input[name=radio-parameter]').on('change', function(){
-    return dispatcher.changeParameter;
+    return dispatcher.changeParameter();
   })
   d3.select('#defaultData-model-dropdown').on('change', function(){
     return dispatcher.changeModel();
@@ -370,6 +370,7 @@ let defaultData = new Dataset('defaultData')
     })
   })
   dispatcher.on('changeParameter', function(){
+    console.log('asdf')
     colorGeo(defaultData);
     updateBarChart(defaultData);
   })
