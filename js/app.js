@@ -30,8 +30,7 @@
       }
     }
   }
-  dropdown('apples', 'past')
-  dropdown('oranges', 'past')
+  dropdown('defaultData', 'past')
 
 
 
