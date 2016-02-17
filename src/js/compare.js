@@ -33,8 +33,6 @@
   dropdown('apples', 'past')
   dropdown('oranges', 'past')
 
-
-
   class Dataset {
     constructor(selector){
       this.selector = selector;
@@ -70,8 +68,6 @@
     get basinJson(){
       return 'data/'+ this.model +'/basin/'+this.geo+'.json'
     }
-
-
   };
 
   // tooltip methods
@@ -188,29 +184,51 @@
   }
 
 
-let apples = new Dataset('apples'),
-    oranges = new Dataset('oranges');
+  let apples = new Dataset('apples'),
+      oranges = new Dataset('oranges'),
+      a2o = new Dataset('a2o');
 
   // download data and draw map
   queue()
     .defer(d3.json, 'data/watersheds-topo2.json')
     .defer(d3.json, apples.yearJson)
     .defer(d3.json, apples.basinJson)
+    .defer(d3.json, oranges.yearJson)
+    .defer(d3.json, oranges.basinJson)
     .await(renderFirst)
 
-  function renderFirst(error, geo, data, annual) {
-    apples.rawData = data;
-    apples.basinData = annual;
-    apples.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
-    // let dataBind = apples.dataByTract();
-    // mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
-    mapsvg.call(renderGeo, apples);
+  function renderFirst(error, geo, appleBasin, appleAnnual, orangeBasin, orangeAnnual) {
+    apples.rawData = appleBasin;
+    apples.basinData = appleAnnual;
+
+    oranges.rawData = orangeBasin;
+    oranges.basinData = orangeAnnual;
+
+    a2o = compare(apples, oranges, a2o);
+    a2o.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
+
+    mapsvg.call(renderGeo, a2o);
     colorGeo(apples);
     drawLegend();
-    barsvg.call(renderBarChart, apples);
+    barsvg.call(renderBarChart, a2o);
   };
 
 
+  function compare(data1, data2, dataOut){
+    dataOut.rawData = data1.rawData.map(function(el,i){
+      let foo = {id:el.id};
+      foo.temp   = +el.temp - +data2.rawData[i].temp;
+      foo.precip =  +el.precip - +data2.rawData[i].precip;
+      return foo;
+    })
+    dataOut.basinData = data1.basinData.map(function(el,i){
+      let foo = {year:el.year};
+      foo.temp   = +el.temp - +data2.rawData[i].temp;
+      foo.precip =  +el.precip - +data2.rawData[i].precip;
+      return foo;
+    })
+    return dataOut;
+  }
 
   /* map drawing and updating methods :
    * renderX = first time
@@ -290,7 +308,7 @@ let apples = new Dataset('apples'),
         } )
         .on("mouseout", tt.hide )
         .on('click', function(d){
-          return dispatcher.changeYear(d.year)
+          return dispatcher.changeYear(+d.year)
         })
     // svg.classed('hidden', true);
   }
@@ -347,15 +365,16 @@ let apples = new Dataset('apples'),
 
 
   /* page listeners */
-  d3.select('#apples-year-dropdown').on('change', function(){
-    return dispatcher.changeYear();
+  d3.selectAll('.year-dropdown').on('change', function(){
+    return dispatcher.changeYear(this.classList[0]);
   })
-  d3.selectAll('input[name=radio-parameter]').on('change', function(){
+  d3.selectAll('.model-dropdown').on('change', function(){
+    return dispatcher.changeModel(this.classList[0]);
+  })
+  d3.select('input[name=radio-parameter]').on('change', function(){
     return dispatcher.changeParameter;
   })
-  d3.select('#apples-model-dropdown').on('change', function(){
-    return dispatcher.changeModel();
-  })
+
   // d3.select(window).on('resize', resize);
 
 
@@ -364,31 +383,67 @@ let apples = new Dataset('apples'),
   /* dispatcher events */
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear', 'changeModel')
   dispatcher.on('changeGeo', function(geo){
-    apples.geo = geo;
+    a2o.geo = geo;
     d3.json( apples.basinJson, function(data){
       apples.basinData = data;
-      updateBarChart(apples);
+      d3.json( oranges.basinJson, function(data){
+        oranges.basinData = data;
+        a2o = compare(apples, oranges, a2o);
+        updateBarChart(a2o);
+      })
     })
   })
   dispatcher.on('changeParameter', function(){
-    colorGeo(apples);
-    updateBarChart(apples);
+    colorGeo(a2o);
+    updateBarChart(a2o);
   })
-  dispatcher.on('changeYear', function(year){
-    if (year) {
-      apples.setDropdown(year);
+  dispatcher.on('changeYear', function(model){
+    // if (year) {
+    //   apples.setDropdown(year);
+    // }
+
+    // year = a2o.year;
+    if (model === 'apples'){
+      d3.json(apples.yearJson, function(data){
+        apples.rawData = data;
+        a2o = compare(apples, oranges, a2o);
+        colorGeo(a2o);
+      })
+    } else if (model === 'oranges'){
+      d3.json(oranges.yearJson, function(data){
+        oranges.rawData = data;
+        a2o = compare(apples, oranges, a2o);
+        colorGeo(a2o);
+      })
+    // }
+    } else if (typeof model === 'number'){
+      console.log('foo')
+      d3.json( oranges.yearJson, function(data){
+
+        oranges.yearData = data;
+        a2o = compare(apples, oranges, a2o);
+        colorGeo(a2o);
+      })
+
+      // apples.setDropdown(model);
+      // oranges.setDropdown(model);
     }
-    year = year || apples.year;
-    d3.json(apples.yearJson, function(data){
-      apples.rawData = data;
-      colorGeo(apples);
-    })
   })
-  dispatcher.on('changeModel', function(){
-    if(apples.model==='HST'){ dropdown('apples', 'past'); }
-    else{ dropdown('apples','future');}
-    dispatcher.changeYear();
-    dispatcher.changeGeo(apples.geo);
+  dispatcher.on('changeModel', function(model){
+    if (model === 'apples'){
+      if(apples.model==='HST'){ dropdown('apples', 'past'); }
+      else{ dropdown('apples','future');}
+      dispatcher.changeYear('apples');
+      dispatcher.changeGeo(a2o.geo);
+    }else if (model === 'oranges'){
+      if(oranges.model==='HST'){ dropdown('oranges', 'past'); }
+      else{ dropdown('oranges','future');}
+      dispatcher.changeYear('oranges');
+      dispatcher.changeGeo(a2o.geo);
+    }
+
+
+
   })
 
 
