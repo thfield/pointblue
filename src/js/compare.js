@@ -65,7 +65,7 @@
     get yearJson(){
       return 'data/'+ this.model +'/annual/'+this.year+'.json'
     }
-    get basinJson(){
+    get basinsJson(){
       return 'data/'+ this.model +'/basin/'+this.geo+'.json'
     }
   };
@@ -189,32 +189,36 @@
       a2o = new Dataset('a2o');
 
   // download data and draw map
+  // TODO: use Promises instead of queue()
   queue()
     .defer(d3.json, 'data/watersheds-topo2.json')
     .defer(d3.json, apples.yearJson)
-    .defer(d3.json, apples.basinJson)
+    .defer(d3.json, apples.basinsJson)
     .defer(d3.json, oranges.yearJson)
-    .defer(d3.json, oranges.basinJson)
+    .defer(d3.json, oranges.basinsJson)
     .await(renderFirst)
 
-  function renderFirst(error, geo, appleBasin, appleAnnual, orangeBasin, orangeAnnual) {
-    apples.rawData = appleBasin;
+  function renderFirst(error, geo, appleBasins, appleAnnual, orangeBasins, orangeAnnual) {
+    // bug: if dropdown model does not match year, map does not draw
+    // fix? change function dropdown(selector, timeframe) to automatically read the .{Dataset}-model <select> state
+    apples.rawData = appleBasins;
     apples.basinData = appleAnnual;
 
-    oranges.rawData = orangeBasin;
+    oranges.rawData = orangeBasins;
     oranges.basinData = orangeAnnual;
 
     a2o = compare(apples, oranges, a2o);
     a2o.topo = topojson.feature(geo, geo.objects['watersheds.geo']).features;
 
     mapsvg.call(renderGeo, a2o);
-    colorGeo(apples);
+    updateGeo(apples);
     drawLegend();
     barsvg.call(renderBarChart, a2o);
   };
 
 
   function compare(data1, data2, dataOut){
+    // dataOut becomes data1 - data2
     dataOut.rawData = data1.rawData.map(function(el,i){
       let foo = {id:el.id};
       foo.temp   = +el.temp - +data2.rawData[i].temp;
@@ -232,7 +236,7 @@
 
   /* map drawing and updating methods :
    * renderX = first time
-   * drawX   = general
+   * drawX   = both
    * updateX = redraw
    */
   function drawLegend(){
@@ -247,7 +251,7 @@
       .enter().append('path')
         .attr('class', dataset.boundary)
         .attr('d', path)
-        .on('click', function(d){ return dispatcher.changeGeo(d.id) })
+        .on('click', function(d){ return dispatcher.changeGeo(d.id) }) //TODO: interaction does not work
         .on('mouseover', function(d) {
           let me = d3.select(this),
               value = colorMap.get(d.id),
@@ -340,7 +344,7 @@
     // barsvg.classed('hidden', false);
   }
 
-  function colorGeo(dataset){
+  function updateGeo(dataset){
     let reverse = false;
     if (dataset.parameter === 'temp'){reverse = true};
     keymap.length = 0;
@@ -384,17 +388,17 @@
   let dispatcher = d3.dispatch('changeGeo', 'changeParameter', 'changeYear', 'changeModel')
   dispatcher.on('changeGeo', function(geo){
     a2o.geo = geo;
-    d3.json( apples.basinJson, function(data){
+    d3.json( apples.basinsJson, function(data){
       apples.basinData = data;
-      d3.json( oranges.basinJson, function(data){
+      d3.json( oranges.basinsJson, function(data){
         oranges.basinData = data;
         a2o = compare(apples, oranges, a2o);
-        updateBarChart(a2o);
+        updateBarChart(a2o); //TODO barchart does not update
       })
     })
   })
   dispatcher.on('changeParameter', function(){
-    colorGeo(a2o);
+    updateGeo(a2o);
     updateBarChart(a2o);
   })
   dispatcher.on('changeYear', function(model){
@@ -407,13 +411,13 @@
       d3.json(apples.yearJson, function(data){
         apples.rawData = data;
         a2o = compare(apples, oranges, a2o);
-        colorGeo(a2o);
+        updateGeo(a2o);
       })
     } else if (model === 'oranges'){
       d3.json(oranges.yearJson, function(data){
         oranges.rawData = data;
         a2o = compare(apples, oranges, a2o);
-        colorGeo(a2o);
+        updateGeo(a2o);
       })
     // }
     } else if (typeof model === 'number'){
@@ -422,7 +426,7 @@
 
         oranges.yearData = data;
         a2o = compare(apples, oranges, a2o);
-        colorGeo(a2o);
+        updateGeo(a2o);
       })
 
       // apples.setDropdown(model);

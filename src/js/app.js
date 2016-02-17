@@ -204,7 +204,7 @@ let defaultData = new Dataset('defaultData')
     // let dataBind = defaultData.dataByTract();
     // mapchart.draw({'Geo': topoFeat, 'ToBind': dataBind});
     mapsvg.call(renderGeo, defaultData);
-    colorGeo(defaultData);
+    updateGeo(defaultData);
     drawLegend();
     barsvg.call(renderBarChart, defaultData);
   };
@@ -321,7 +321,7 @@ let defaultData = new Dataset('defaultData')
     // barsvg.classed('hidden', false);
   }
 
-  function colorGeo(dataset){
+  function updateGeo(dataset){
     let reverse = false;
     if (dataset.parameter === 'temp'){reverse = true};
     keymap.length = 0;
@@ -371,7 +371,7 @@ let defaultData = new Dataset('defaultData')
   })
   dispatcher.on('changeParameter', function(){
     console.log('asdf')
-    colorGeo(defaultData);
+    updateGeo(defaultData);
     updateBarChart(defaultData);
   })
   dispatcher.on('changeYear', function(year){
@@ -381,7 +381,7 @@ let defaultData = new Dataset('defaultData')
     year = year || defaultData.year;
     d3.json(defaultData.yearJson, function(data){
       defaultData.rawData = data;
-      colorGeo(defaultData);
+      updateGeo(defaultData);
     })
   })
   dispatcher.on('changeModel', function(){
