@@ -12,13 +12,13 @@
 
   <link rel="stylesheet" href="css/styles.vendor.css">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.js" charset="utf-8"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js" charset="utf-8"></script>
+  <script src="vendor/d3.js" charset="utf-8"></script>
+  <script src="vendor/topojson.js" charset="utf-8"></script>
   <script src="vendor/index.js"></script>
   <!-- <script src="vendor/d3.chart.js"></script> -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+  <script src="vendor/queue.js"></script>
   <script src="vendor/d3-legend.js"></script>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script> -->
+  <!-- <script src="vendor/lodash.js"></script> -->
 </head>
 
 <body>
@@ -48,13 +48,19 @@
         Click on a watershed to show historical data in the bar chart
       </p>
       <p>
-        <select name="defaultData-model" id="defaultData-model-dropdown">
-          <option value="HST" selected>Historical</option>
-          <option value="CCSM4_rcp85">CCSM4 RCP8.5</option>
+        <select name="apples-model" id="apples-model-dropdown" class="apples model-dropdown">
+          <option class="apples" value="HST" selected>Historical</option>
+          <option class="apples" value="CCSM4_rcp85">CCSM4 RCP8.5</option>
         </select>
-        <select name="defaultData-year" id="defaultData-year-dropdown"></select>
+        <select name="apples-year" id="apples-year-dropdown" class="apples year-dropdown"></select>
       </p>
-
+      <p>
+        <select name="oranges-model" id="oranges-model-dropdown" class="oranges model-dropdown">
+          <option class="oranges" value="HST" selected>Historical</option>
+          <option class="oranges" value="CCSM4_rcp85">CCSM4 RCP8.5</option>
+        </select>
+        <select name="oranges-year" id="oranges-year-dropdown" class="oranges year-dropdown"></select>
+      </p>
     </form>
 
         <div id="map_container" class="eight columns chart-container"> </div>
@@ -63,7 +69,8 @@
   </div>
 
   <div class="row">
-    <div id="defaultData" class="twelve columns chart-container"> </div>
+    <div id="apples" class="twelve columns chart-container"> </div>
+    <div id="oranges" class="twelve columns chart-container"> </div>
   </div>
 
   <div class="row">
